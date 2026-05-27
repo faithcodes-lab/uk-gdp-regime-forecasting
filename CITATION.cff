@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+type: software
+title: "UK GDP Regime Forecasting: Interpretable Gradient Boosting with Regime-Aware SHAP Stability Analysis"
+authors:
+  - family-names: "Olan-George"
+    given-names: "Faith"
+    orcid: ""
+date-released: "2026-09-03"
+url: "https://github.com/faithcodes-lab/uk-gdp-regime-forecasting"
+license: MIT
+keywords:
+  - gdp-forecasting
+  - shap
+  - explainable-ai
+  - xgboost
+  - lightgbm
+  - structural-breaks
+  - time-series
+  - uk-economy

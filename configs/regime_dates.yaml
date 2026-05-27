@@ -1,0 +1,36 @@
+regimes:
+  pre_gfc:
+    label: "Pre-GFC Stability"
+    start: "2000-Q1"
+    end: "2007-Q4"
+    description: "Relatively stable macro environment, the Great Moderation"
+
+  gfc:
+    label: "Global Financial Crisis"
+    start: "2008-Q1"
+    end: "2009-Q4"
+    description: "Credit crunch, banking crisis, deepest UK recession since WWII"
+
+  pre_brexit:
+    label: "Pre-Brexit Recovery"
+    start: "2010-Q1"
+    end: "2016-Q2"
+    description: "Slow recovery, austerity, quantitative easing"
+
+  brexit:
+    label: "Brexit Transition"
+    start: "2016-Q3"
+    end: "2019-Q4"
+    description: "EU referendum through to pre-COVID uncertainty"
+
+  covid:
+    label: "COVID-19 Shock"
+    start: "2020-Q1"
+    end: "2021-Q2"
+    description: "Pandemic-driven collapse and initial recovery"
+
+  post_covid:
+    label: "Post-COVID Recovery"
+    start: "2021-Q3"
+    end: "2025-Q4"
+    description: "Recovery, inflation surge, cost-of-living crisis"

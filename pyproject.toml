@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "uk-gdp-regime-forecasting"
+version = "0.1.0"
+description = "Interpretable ML forecasting of UK GDP growth with regime-aware SHAP stability analysis across GFC, Brexit, and COVID-19 structural breaks (2000-2025)"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "Faith Olan-George"}
+]
+keywords = ["gdp", "forecasting", "shap", "xgboost", "lightgbm", "structural-breaks", "explainable-ai"]
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "I", "N", "W"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
