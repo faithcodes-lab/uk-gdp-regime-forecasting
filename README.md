@@ -1,8 +1,6 @@
-# Forecasting UK GDP Growth Using Interpretable Gradient Boosting and Traditional Econometric Methods
+# Forecasting UK GDP Growth Using Interpretable Gradient Boosting and Traditional Econometric Methods: Regime-Aware SHAP Stability Analysis Across the GFC, Brexit, and COVID-19 Structural Breaks (2000–2025)
 
-**Regime-Aware SHAP Stability Analysis Across the GFC, Brexit, and COVID-19 Structural Breaks (2000–2025)**
-
-MSc Data Science — University of the West of England (UWE Bristol), 2026
+MSc Data Science: University of the West of England (UWE Bristol), 2026
 
 ---
 
