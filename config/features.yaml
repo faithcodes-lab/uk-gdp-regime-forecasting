@@ -1,0 +1,75 @@
+# Feature engineering configuration for UK GDP regime forecasting.
+
+# Specifies the target, the raw predictors retained in the final feature
+# matrix, intermediate-only variables that feed engineered features but
+# are dropped before model training, and the explicit list of engineered
+# features. The final feature matrix is 18 columns by design (1 target + 10 raw
+# predictors + 7 engineered features); 17 are active while
+# yield_curve_slope (= 10Y − 2Y) is deferred until the 2-year gilt is extracted from the BoE yield-curve spreadsheet.
+
+target:
+  name: gdp_growth
+  description: UK GDP quarter-on-quarter growth rate (% change)
+
+raw_predictors_kept:
+  ons:
+    - unemployment_rate
+    - cpi_inflation
+    - trade_balance
+    - gfcf_growth
+    - govt_consumption_growth
+  boe:
+    - bank_rate
+    - gbp_usd_rate
+  market:
+    - brent_oil
+  sentiment:
+    - business_confidence
+    - consumer_confidence
+
+# Used to compute yield_curve_slope, then dropped from the final matrix.
+intermediate_only_then_dropped:
+  - gilt_2y_yield
+  - gilt_10y_yield
+
+engineered:
+  - name: gdp_lag_1
+    source: gdp_growth
+    transformation: lag
+    periods: 1
+    description: GDP growth lagged one quarter
+  - name: gdp_lag_4
+    source: gdp_growth
+    transformation: lag
+    periods: 4
+    description: GDP growth lagged four quarters
+  - name: gdp_rolling_mean_4q
+    source: gdp_growth
+    transformation: rolling_mean
+    window: 4
+    description: Four-quarter rolling mean of GDP growth
+  - name: gdp_yoy
+    source: gdp_growth
+    transformation: year_over_year
+    periods: 4
+    description: Year-on-year change in GDP
+  - name: cpi_yoy
+    source: cpi_inflation
+    transformation: year_over_year
+    periods: 4
+    description: Year-on-year change in CPI
+  - name: business_confidence_rolling_mean_4q
+    source: business_confidence
+    transformation: rolling_mean
+    window: 4
+    description: Four-quarter rolling mean of business confidence
+  - name: yield_curve_slope
+    sources: [gilt_10y_yield, gilt_2y_yield]
+    transformation: subtract
+    deferred: true                   # engineer.py and downstream code must skip when deferred is true
+    description: Yield curve slope (10-year gilt yield minus 2-year gilt yield); deferred until the 2-year gilt is extracted from the BoE yield-curve spreadsheet
+
+# Active count reflects features actually wired in. Reverts to 18 when
+# yield_curve_slope is wired in (gilt_2y_yield is downloaded at that time).
+final_column_count: 17
+final_column_count_when_slope_wired: 18

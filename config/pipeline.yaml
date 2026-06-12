@@ -1,0 +1,119 @@
+# Pipeline configuration for UK GDP regime forecasting.
+
+
+
+project:
+  name: uk-gdp-regime-forecasting
+  random_state: 42
+  date_range:
+    start: 2000-01-01
+    end: 2025-12-31
+
+paths:
+  raw: data/raw
+  interim: data/interim
+  processed: data/processed
+  schemas: data/schemas
+  lineage: data/lineage
+  api_cache: data/raw/_api_responses
+  final_dataset: data/processed/final_dataset.parquet
+
+data_sources:
+
+  ons:
+    # ONS retired the api.ons.gov.uk API in Nov 2024. Data now comes from the
+    # ONS website timeseries JSON, built as:
+    #   <api_base>/<path>/timeseries/<cdid>/<dataset>/data
+    api_base: https://www.ons.gov.uk
+    series:
+      gdp_growth:
+        cdid: IHYQ
+        path: economy/grossdomesticproductgdp
+        dataset: qna
+        frequency: quarterly
+        aggregation: identity
+        description: UK GDP quarter-on-quarter growth rate (target variable)
+      unemployment_rate:
+        cdid: MGSX
+        path: employmentandlabourmarket/peoplenotinwork/unemployment
+        dataset: lms
+        frequency: monthly
+        aggregation: quarterly_mean
+        description: UK unemployment rate (Labour Force Survey, aged 16+)
+      cpi_inflation:
+        cdid: D7G7
+        path: economy/inflationandpriceindices
+        dataset: mm23
+        frequency: monthly
+        aggregation: quarterly_mean
+        description: UK CPI 12-month inflation rate
+      trade_balance:
+        cdid: IKBJ
+        path: economy/nationalaccounts/balanceofpayments
+        dataset: mret
+        frequency: monthly
+        aggregation: quarterly_mean
+        description: UK total trade balance (goods and services)
+      gfcf_growth:
+        cdid: NPQT
+        path: economy/grossdomesticproductgdp
+        dataset: qna
+        frequency: quarterly
+        aggregation: identity
+        description: Gross fixed capital formation, quarterly growth
+      govt_consumption_growth:
+        cdid: NMRY
+        path: economy/grossdomesticproductgdp
+        dataset: qna
+        frequency: quarterly
+        aggregation: identity
+        description: General government final consumption expenditure, quarterly growth
+
+  boe:
+    iadb_base: https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp
+    series:
+      bank_rate:
+        code: IUDBEDR                    # Bank of England Bank Rate, end of period
+        url: "https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes&SeriesCodes=IUDBEDR&UsingCodes=Y&CSVF=TN&Datefrom=01/Jan/2000&Dateto=31/Dec/2025"  
+        frequency: monthly
+        aggregation: end_of_period
+        description: Bank of England Bank Rate
+      gilt_2y_yield:
+        code: _PENDING_VERIFICATION      # UK 2-year gilt yield; deferred until extracted from the BoE yield-curve spreadsheet  (feeds yield_curve_slope = 10Y − 2Y)
+        url: _PENDING_VERIFICATION
+        frequency: monthly
+        aggregation: end_of_period
+        deferred: true                   # downloaders skip cleanly; rewire when the 2-year gilt is extracted in CP4
+        description: UK 2-year gilt yield (deferred until extracted from the BoE yield-curve spreadsheet in CP4; feeds yield_curve_slope = 10Y − 2Y)
+      gbp_usd_rate:
+        code: XUDLUSS                    #  Spot exchange rate, US$ into £, end of period
+        url: "https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes&SeriesCodes=XUDLUSS&UsingCodes=Y&CSVF=TN&Datefrom=01/Jan/2000&Dateto=31/Dec/2025"  
+        frequency: monthly
+        aggregation: end_of_period
+        description: GBP/USD spot exchange rate
+
+  fred:
+    api_base: https://api.stlouisfed.org/fred/series/observations
+    api_key_env: FRED_API_KEY
+    rate_limit_sleep_seconds: 0.5
+    series:
+      brent_oil:
+        code: DCOILBRENTEU
+        frequency: daily
+        aggregation: quarterly_mean
+        description: Crude oil prices, Brent (Europe)
+      gilt_10y_yield:
+        code: IRLTLT01GBM156N
+        frequency: monthly
+        aggregation: end_of_period
+        description: UK 10-year government bond yield (downloaded now; consumed by yield_curve_slope once that feature is wired in)
+      business_confidence:
+        code: BSCICP02GBM460S            # OECD Business Confidence Indicator for UK (PMI proxy)
+        frequency: monthly
+        aggregation: quarterly_mean
+        description: OECD Business Confidence Indicator for the UK (PMI proxy)
+      consumer_confidence:
+        code: CSCICP02GBM460S            # OECD Consumer Confidence Indicator for UK
+        frequency: monthly
+        aggregation: quarterly_mean
+        description: OECD Consumer Confidence Indicator for the UK

@@ -67,3 +67,6 @@ target-version = ["py311"]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "-v --cov=src --cov-report=term-missing"
+markers = [
+    "integration: tests that hit real external services; manual run only",
+]

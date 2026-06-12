@@ -1,0 +1,36 @@
+# Six UK economic regimes for SHAP stability analysis.
+# Boundaries will be justified by both literature and statistical detection in subsequent structural breaks analysis step.
+# (Chow + Bai-Perron via ruptures).
+# Quarter counts sum to 104.
+
+regimes:
+  - id: 1
+    label: Pre-GFC Stability
+    start: 2000-01-01
+    end: 2007-12-31
+    quarters: 32
+  - id: 2
+    label: Global Financial Crisis
+    start: 2008-01-01
+    end: 2009-12-31
+    quarters: 8
+  - id: 3
+    label: Post-GFC Recovery
+    start: 2010-01-01
+    end: 2016-06-30
+    quarters: 26
+  - id: 4
+    label: Brexit Transition
+    start: 2016-07-01
+    end: 2019-12-31
+    quarters: 14
+  - id: 5
+    label: COVID-19 Shock
+    start: 2020-01-01
+    end: 2021-06-30
+    quarters: 6
+  - id: 6
+    label: Post-COVID Recovery
+    start: 2021-07-01
+    end: 2025-12-31
+    quarters: 18
