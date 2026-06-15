@@ -108,13 +108,13 @@ def _synthetic_processed_frame() -> pd.DataFrame:
             "bank_rate": [0.75, 0.10],
             "gbp_usd_rate": [1.25, 1.24],
             "brent_oil": [50.0, 30.0],
-            "business_confidence": [99.5, 96.5],
-            "consumer_confidence": [99.0, 95.0],
+            "business_confidence": [-4.5, -23.5],
+            "consumer_confidence": [-12.0, -30.0],
             "gdp_lag_1": [0.5, -2.0],
             "gdp_lag_4": [0.6, 0.4],
             "gdp_rolling_mean_4q": [0.2, -5.0],
             "gdp_yoy": [1.5, -20.0],
-            "business_confidence_rolling_mean_4q": [100.0, 98.5],
+            "business_confidence_rolling_mean_4q": [-3.0, -15.0],
             "yield_curve_slope": [0.5, 0.3],
         }
     )

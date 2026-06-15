@@ -55,19 +55,19 @@ data_sources:
         aggregation: quarterly_mean
         description: UK total trade balance (goods and services)
       gfcf_growth:
-        cdid: NPQT
+        cdid: NPQT                       # ONS publishes NPQT as a CVM SA £m level; QoQ growth is computed in the pipeline
         path: economy/grossdomesticproductgdp
         dataset: qna
         frequency: quarterly
-        aggregation: identity
-        description: Gross fixed capital formation, quarterly growth
+        aggregation: qoq_pct_change
+        description: Gross fixed capital formation, quarterly growth (derived QoQ % change from NPQT level)
       govt_consumption_growth:
-        cdid: NMRY
+        cdid: NMRY                       # ONS publishes NMRY as a CVM SA £m level; QoQ growth is computed in the pipeline
         path: economy/grossdomesticproductgdp
         dataset: qna
         frequency: quarterly
-        aggregation: identity
-        description: General government final consumption expenditure, quarterly growth
+        aggregation: qoq_pct_change
+        description: General government final consumption expenditure, quarterly growth (derived QoQ % change from NMRY level)
 
   boe:
     iadb_base: https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp

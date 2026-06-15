@@ -6,7 +6,10 @@ applying the aggregation method declared in config/pipeline.yaml:
 
 identity: input is already quarterly; aligns dates to the nearest QE.
 quarterly_mean: average within each quarter.
-end_of_period last observed value within each quarter.
+end_of_period: last observed value within each quarter.
+qoq_pct_change: quarter-on-quarter percent change of a quarterly level
+    series (e.g. ONS chained-volume £m levels for GFCF and government
+    consumption). First quarter is NaN.
 
 Uses the modern "QE" resampling alias rather than the deprecated "Q"
 """
@@ -15,7 +18,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-_VALID_METHODS = ("identity", "quarterly_mean", "end_of_period")
+_VALID_METHODS = ("identity", "quarterly_mean", "end_of_period", "qoq_pct_change")
 
 
 def to_quarterly(
@@ -51,8 +54,11 @@ def to_quarterly(
 
     if method in {"identity", "end_of_period"}:
         result = indexed.resample("QE").last()
-    else:  # quarterly_mean
+    elif method == "quarterly_mean":
         result = indexed.resample("QE").mean()
+    else:  # qoq_pct_change
+        # ONS level series (e.g. NPQT, NMRY) to QoQ % change.
+        result = indexed.resample("QE").last().pct_change() * 100.0
 
     out = result.reset_index()
     out.columns = ["date", "value"]

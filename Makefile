@@ -1,11 +1,15 @@
 # Makefile for UK GDP Regime Forecasting
 # Run `make help` to see available targets.
 
-.PHONY: help install test lint format clean
+.PHONY: help install download process data all test lint format format-check clean
 
 help:
 	@echo "Available targets:"
 	@echo "  install       Install dependencies into the current venv"
+	@echo "  download      Download raw data from all sources (ONS, BoE, FRED, BoE_YC)"
+	@echo "  process       Build final dataset from cached raw CSVs (skips downloads)"
+	@echo "  data          End-to-end: download + process; writes data/processed/final_dataset.parquet"
+	@echo "  all           Build dataset, run tests, run lint, check formatting"
 	@echo "  test          Run the pytest suite"
 	@echo "  lint          Run ruff linter"
 	@echo "  format        Run black formatter"
@@ -14,6 +18,17 @@ help:
 
 install:
 	pip install -e ".[dev,notebooks]"
+
+download:
+	python -m src.data.build_dataset --download-only
+
+process:
+	python -m src.data.build_dataset --process-only
+
+data:
+	python -m src.data.build_dataset
+
+all: data test lint format-check
 
 test:
 	pytest

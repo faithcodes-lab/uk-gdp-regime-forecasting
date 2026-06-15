@@ -67,15 +67,21 @@ _RAW_KEPT_COLUMNS = {
     ),
     "business_confidence": Column(
         float,
-        checks=Check.in_range(85.0, 115.0),
+        checks=Check.in_range(-60.0, 60.0),
         nullable=False,
-        description="OECD Business Confidence Indicator for the UK (PMI proxy).",
+        description=(
+            "OECD/FRED Business Tendency Surveys confidence indicator "
+            "(BSCICP02GBM460S) for the UK; percentage balance."
+        ),
     ),
     "consumer_confidence": Column(
         float,
-        checks=Check.in_range(85.0, 115.0),
+        checks=Check.in_range(-60.0, 60.0),
         nullable=False,
-        description="OECD Consumer Confidence Indicator for the UK.",
+        description=(
+            "OECD/FRED Consumer Opinion Surveys composite confidence "
+            "(CSCICP02GBM460S) for the UK; percentage balance."
+        ),
     ),
 }
 
@@ -106,9 +112,9 @@ _ENGINEERED_COLUMNS = {
     ),
     "business_confidence_rolling_mean_4q": Column(
         float,
-        checks=Check.in_range(85.0, 115.0),
+        checks=Check.in_range(-60.0, 60.0),
         nullable=True,
-        description="Four-quarter rolling mean of business confidence.",
+        description="Four-quarter rolling mean of business confidence (percentage balance).",
     ),
     "yield_curve_slope": Column(
         float,

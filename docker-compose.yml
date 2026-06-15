@@ -1,0 +1,16 @@
+services:
+  pipeline:
+    build: .
+    image: uk-gdp-regime-forecasting:latest
+    container_name: uk-gdp-pipeline
+    env_file: .env
+    working_dir: /app
+    volumes:
+      # Persist downloads + processed outputs on the host so a second run on
+      # the same machine reuses raw data and the parquet is visible outside.
+      - ./data/raw:/app/data/raw
+      - ./data/interim:/app/data/interim
+      - ./data/processed:/app/data/processed
+      - ./data/lineage:/app/data/lineage
+      - ./logs:/app/logs
+    # Default command is the Dockerfile CMD (`make data`).

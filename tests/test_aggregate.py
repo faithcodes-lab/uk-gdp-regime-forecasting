@@ -61,8 +61,21 @@ def test_qe_alias_produces_quarter_end_dates() -> None:
     result = to_quarterly(df, method="quarterly_mean")
     months = [d.month for d in result["date"]]
     assert months == [3, 6, 9, 12]
-    # 31-Mar / 30-Jun / 30-Sep / 31-Dec — all last day of month
+    # 31-Mar / 30-Jun / 30-Sep / 31-Dec  all last day of month
     assert (result["date"] == result["date"] + pd.offsets.MonthEnd(0)).all()
+
+
+def test_qoq_pct_change_on_quarterly_level_input() -> None:
+    df = pd.DataFrame(
+        {
+            "date": pd.to_datetime(["2020-03-31", "2020-06-30", "2020-09-30"]),
+            "value": [100.0, 110.0, 121.0],
+        }
+    )
+    result = to_quarterly(df, method="qoq_pct_change")
+    assert pd.isna(result["value"].iloc[0])
+    assert abs(result["value"].iloc[1] - 10.0) < 1e-9
+    assert abs(result["value"].iloc[2] - 10.0) < 1e-9
 
 
 def test_quarterly_mean_on_daily_input() -> None:

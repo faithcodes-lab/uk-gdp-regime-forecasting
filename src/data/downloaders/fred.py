@@ -44,7 +44,8 @@ def download_fred_series(series_name: str, *, save: bool = True) -> pd.DataFrame
     load_dotenv()
     api_key = os.environ.get("FRED_API_KEY")
     if not api_key:
-        raise RuntimeError("FRED_API_KEY is not set; add it to .env before downloading.")
+        raise RuntimeError(
+            "FRED_API_KEY is not set; add it to .env before downloading.")
 
     cfg = pipeline_config()["data_sources"]["fred"]
     series_cfg = cfg["series"][series_name]
@@ -101,7 +102,7 @@ def _parse_fred_response(payload: dict[str, Any]) -> pd.DataFrame:
         raise RuntimeError("FRED response had no observations.")
     df = pd.DataFrame(rows)
     df["date"] = pd.to_datetime(df["date"])
-    df["value"] = pd.to_numeric(df["value"], errors="coerce")
+    df["value"] = pd.to_numeric(df["value"], errors="coerce").astype(float)
     return df[["date", "value"]].dropna(subset=["value"]).reset_index(drop=True)
 
 

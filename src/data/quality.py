@@ -57,8 +57,7 @@ def _check_quarter_end_dates(df: pd.DataFrame) -> None:
     bad_month = ~dates.dt.month.isin(_QUARTER_END_MONTHS)
     if bad_month.any():
         n = int(bad_month.sum())
-        raise QualityCheckFailed(
-            f"{n} rows have dates not in March/June/September/December.")
+        raise QualityCheckFailed(f"{n} rows have dates not in March/June/September/December.")
     last_day = dates + pd.offsets.MonthEnd(0)
     if not (dates == last_day).all():
         n = int((dates != last_day).sum())
@@ -67,8 +66,7 @@ def _check_quarter_end_dates(df: pd.DataFrame) -> None:
 
 def _check_no_missing_quarters(df: pd.DataFrame) -> None:
     dates = pd.to_datetime(df["date"]).sort_values().reset_index(drop=True)
-    expected = pd.date_range(
-        start=dates.iloc[0], end=dates.iloc[-1], freq="QE")
+    expected = pd.date_range(start=dates.iloc[0], end=dates.iloc[-1], freq="QE")
     missing = expected.difference(dates)
     if len(missing) > 0:
         raise QualityCheckFailed(
@@ -123,8 +121,7 @@ def _check_covid_outlier_present(df: pd.DataFrame) -> None:
     dates = pd.to_datetime(df["date"])
     covid = df.loc[dates == _COVID_Q2_2020]
     if len(covid) == 0:
-        raise QualityCheckFailed(
-            "COVID Q2 2020 row (2020-06-30) missing from dataset.")
+        raise QualityCheckFailed("COVID Q2 2020 row (2020-06-30) missing from dataset.")
     value = float(covid["gdp_growth"].iloc[0])
     if not value < _COVID_SHOCK_CEILING:
         raise QualityCheckFailed(

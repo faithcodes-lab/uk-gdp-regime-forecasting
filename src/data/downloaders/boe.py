@@ -41,7 +41,13 @@ def download_boe_series(series_name: str, *, save: bool = True) -> pd.DataFrame:
     require_resolved(series_name, code=code, url=url)
 
     logger.info("BoE {} (code={}): GET {}", series_name, code, url)
-    response = requests.get(url, timeout=60)
+    # BoE rejects the default Python user-agent with HTTP 403; identify as a
+    # browser so the IADB CSV endpoint serves the file.
+    response = requests.get(
+        url,
+        timeout=60,
+        headers={"User-Agent": "Mozilla/5.0 (uk-gdp-regime-forecasting)"},
+    )
     response.raise_for_status()
     cache_raw_response("boe", series_name, response.content, "csv")
 
@@ -60,7 +66,8 @@ def download_boe_series(series_name: str, *, save: bool = True) -> pd.DataFrame:
             code=code,
             raw_csv_path=out,
             transformations=["http_get", "parse_iadb_csv", "validate"],
-            parameters={"code": code, "frequency": series_cfg["frequency"], "url": url},
+            parameters={"code": code,
+                        "frequency": series_cfg["frequency"], "url": url},
         )
     return df
 
@@ -87,7 +94,7 @@ def _parse_iadb_csv(text: str) -> pd.DataFrame:
         raise RuntimeError("BoE IADB CSV had no value column.")
     df = df.rename(columns={non_date_cols[0]: "value"})
     df["date"] = pd.to_datetime(df["date"], format="%d %b %Y", errors="coerce")
-    df["value"] = pd.to_numeric(df["value"], errors="coerce")
+    df["value"] = pd.to_numeric(df["value"], errors="coerce").astype(float)
     return df[["date", "value"]].dropna().sort_values("date").reset_index(drop=True)
 
 

@@ -78,30 +78,26 @@ def _fake_fred_cfg(code: str) -> dict:
 
 
 def test_ons_refuses_pending_sentinel(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(ons_mod, "pipeline_config",
-                        lambda: _fake_ons_cfg(PENDING_SENTINEL))
+    monkeypatch.setattr(ons_mod, "pipeline_config", lambda: _fake_ons_cfg(PENDING_SENTINEL))
     with pytest.raises(RuntimeError, match="unresolved"):
         ons_mod.download_ons_series("test_series", save=False)
 
 
 def test_boe_refuses_pending_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(boe_mod, "pipeline_config",
-                        lambda: _fake_boe_cfg("CODE", PENDING_SENTINEL))
+    monkeypatch.setattr(boe_mod, "pipeline_config", lambda: _fake_boe_cfg("CODE", PENDING_SENTINEL))
     with pytest.raises(RuntimeError, match="unresolved"):
         boe_mod.download_boe_series("test_series", save=False)
 
 
 def test_fred_refuses_pending_sentinel(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(fred_mod, "pipeline_config",
-                        lambda: _fake_fred_cfg(PENDING_SENTINEL))
+    monkeypatch.setattr(fred_mod, "pipeline_config", lambda: _fake_fred_cfg(PENDING_SENTINEL))
     monkeypatch.setenv("FRED_API_KEY", "test_key")
     with pytest.raises(RuntimeError, match="unresolved"):
         fred_mod.download_fred_series("test_series", save=False)
 
 
 def test_fred_refuses_when_api_key_missing(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(fred_mod, "pipeline_config",
-                        lambda: _fake_fred_cfg("ANY"))
+    monkeypatch.setattr(fred_mod, "pipeline_config", lambda: _fake_fred_cfg("ANY"))
     monkeypatch.delenv("FRED_API_KEY", raising=False)
     monkeypatch.setattr(fred_mod, "load_dotenv", lambda *_a, **_kw: None)
     with pytest.raises(RuntimeError, match="FRED_API_KEY"):
@@ -218,8 +214,7 @@ def test_ons_end_to_end_writes_artefacts(monkeypatch: pytest.MonkeyPatch, tmp_pa
     fake_response.content = json.dumps(ONS_QUARTERLY_PAYLOAD).encode("utf-8")
     fake_response.json.return_value = ONS_QUARTERLY_PAYLOAD
     fake_response.raise_for_status = MagicMock()
-    monkeypatch.setattr(ons_mod.requests, "get",
-                        lambda *_a, **_kw: fake_response)
+    monkeypatch.setattr(ons_mod.requests, "get", lambda *_a, **_kw: fake_response)
 
     df = ons_mod.download_ons_series("gdp_growth", save=True)
     assert len(df) == 3
@@ -242,15 +237,13 @@ def test_fred_end_to_end_writes_artefacts(monkeypatch: pytest.MonkeyPatch, tmp_p
     _redirect_outputs(monkeypatch, tmp_path)
     monkeypatch.setenv("FRED_API_KEY", "test_key")
     monkeypatch.setattr(fred_mod, "load_dotenv", lambda *_a, **_kw: None)
-    monkeypatch.setattr(fred_mod, "pipeline_config",
-                        lambda: _fake_fred_cfg("DCOILBRENTEU"))
+    monkeypatch.setattr(fred_mod, "pipeline_config", lambda: _fake_fred_cfg("DCOILBRENTEU"))
 
     fake_response = MagicMock()
     fake_response.content = json.dumps(FRED_PAYLOAD).encode("utf-8")
     fake_response.json.return_value = FRED_PAYLOAD
     fake_response.raise_for_status = MagicMock()
-    monkeypatch.setattr(fred_mod.requests, "get",
-                        lambda *_a, **_kw: fake_response)
+    monkeypatch.setattr(fred_mod.requests, "get", lambda *_a, **_kw: fake_response)
 
     df = fred_mod.download_fred_series("test_series", save=True)
     assert len(df) == 2
@@ -271,8 +264,7 @@ def test_cache_raw_response_keeps_only_last_five(
 ) -> None:
     _redirect_outputs(monkeypatch, tmp_path)
     for i in range(7):
-        common_mod.cache_raw_response(
-            "ons", "x", f"payload{i}".encode(), "json")
+        common_mod.cache_raw_response("ons", "x", f"payload{i}".encode(), "json")
 
     cache_dir = tmp_path / "data" / "raw" / "_api_responses" / "ons"
     files = sorted(cache_dir.glob("x__*.json"))
@@ -346,8 +338,7 @@ def _make_synthetic_glc_xlsx(
     for r_idx, date in enumerate(dates, start=5):
         ws.cell(row=r_idx, column=1, value=date)
         for c_idx, m in enumerate(years_cols, start=2):
-            ws.cell(row=r_idx, column=c_idx,
-                    value=values_by_maturity[m][r_idx - 5])
+            ws.cell(row=r_idx, column=c_idx, value=values_by_maturity[m][r_idx - 5])
 
     buf = _io.BytesIO()
     wb.save(buf)
@@ -372,8 +363,7 @@ def test_boe_yc_rejects_html_response_with_zip_signature_guard(
     # BoE serves error pages with HTTP 200 plus HTML body; the downloader must
     # refuse anything whose first four bytes are not the ZIP signature.
     boe_yc_mod._archive_cache.clear()
-    monkeypatch.setattr(boe_yc_mod, "pipeline_config",
-                        lambda: _fake_boe_yc_cfg())
+    monkeypatch.setattr(boe_yc_mod, "pipeline_config", lambda: _fake_boe_yc_cfg())
 
     fake = MagicMock()
     fake.content = b"<!DOCTYPE html><html><body>Service unavailable</body></html>"
@@ -388,8 +378,7 @@ def test_boe_yc_parses_synthetic_archive_for_both_maturities(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     boe_yc_mod._archive_cache.clear()
-    monkeypatch.setattr(boe_yc_mod, "pipeline_config",
-                        lambda: _fake_boe_yc_cfg())
+    monkeypatch.setattr(boe_yc_mod, "pipeline_config", lambda: _fake_boe_yc_cfg())
 
     years_cols = [0.5, 1.0, 1.5, 2.0, 2.5, 5.0, 10.0]
     dates = [pd.Timestamp("2020-01-31"), pd.Timestamp("2020-02-29")]
@@ -424,8 +413,7 @@ def test_boe_yc_concatenates_across_multiple_xlsx_files(
     # Mirrors the real archive's three-file split; concatenated rows should
     # cover both periods without duplication.
     boe_yc_mod._archive_cache.clear()
-    monkeypatch.setattr(boe_yc_mod, "pipeline_config",
-                        lambda: _fake_boe_yc_cfg())
+    monkeypatch.setattr(boe_yc_mod, "pipeline_config", lambda: _fake_boe_yc_cfg())
 
     years_cols = [2.0, 10.0]
     xlsx_old = _make_synthetic_glc_xlsx(
@@ -438,8 +426,7 @@ def test_boe_yc_concatenates_across_multiple_xlsx_files(
         [pd.Timestamp("2020-01-31")],
         {2.0: [0.40], 10.0: [1.50]},
     )
-    archive = _make_synthetic_archive(
-        [("old.xlsx", xlsx_old), ("new.xlsx", xlsx_new)])
+    archive = _make_synthetic_archive([("old.xlsx", xlsx_old), ("new.xlsx", xlsx_new)])
 
     fake = MagicMock()
     fake.content = archive
@@ -448,8 +435,7 @@ def test_boe_yc_concatenates_across_multiple_xlsx_files(
 
     df = boe_yc_mod.download_boe_yc_series("gilt_2y_yield", save=False)
     assert len(df) == 2
-    assert list(df["date"]) == [pd.Timestamp(
-        "2019-12-31"), pd.Timestamp("2020-01-31")]
+    assert list(df["date"]) == [pd.Timestamp("2019-12-31"), pd.Timestamp("2020-01-31")]
     assert list(df["value"]) == [0.30, 0.40]
 
 
@@ -459,8 +445,7 @@ def test_boe_yc_raises_when_maturity_missing_from_header(
     boe_yc_mod._archive_cache.clear()
     # Build an archive whose XLSX header has no 10-year column; the 10y
     # downloader should raise rather than silently return nothing.
-    monkeypatch.setattr(boe_yc_mod, "pipeline_config",
-                        lambda: _fake_boe_yc_cfg())
+    monkeypatch.setattr(boe_yc_mod, "pipeline_config", lambda: _fake_boe_yc_cfg())
     years_cols = [0.5, 1.0, 2.0]  # no 10.0
     xlsx = _make_synthetic_glc_xlsx(
         years_cols,
@@ -481,8 +466,7 @@ def test_boe_yc_raises_when_maturity_missing_from_header(
 def test_boe_yc_e2e_writes_artefacts(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     _redirect_outputs(monkeypatch, tmp_path)
     boe_yc_mod._archive_cache.clear()
-    monkeypatch.setattr(boe_yc_mod, "pipeline_config",
-                        lambda: _fake_boe_yc_cfg())
+    monkeypatch.setattr(boe_yc_mod, "pipeline_config", lambda: _fake_boe_yc_cfg())
 
     xlsx = _make_synthetic_glc_xlsx(
         [2.0, 10.0],
@@ -502,8 +486,7 @@ def test_boe_yc_e2e_writes_artefacts(monkeypatch: pytest.MonkeyPatch, tmp_path: 
     csv_path = tmp_path / "data" / "raw" / "boe_yc" / "gilt_2y_yield.csv"
     assert csv_path.exists()
 
-    lineage_path = tmp_path / "data" / "lineage" / \
-        "boe_yc__gilt_2y_yield.lineage.json"
+    lineage_path = tmp_path / "data" / "lineage" / "boe_yc__gilt_2y_yield.lineage.json"
     assert lineage_path.exists()
     record = json.loads(lineage_path.read_text(encoding="utf-8"))
     assert record["source"] == "boe_yc:GLC_2.0y_nominal_spot"

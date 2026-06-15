@@ -79,8 +79,7 @@ def download_boe_yc_series(series_name: str, *, save: bool = True) -> pd.DataFra
     if save:
         cache_raw_response("boe_yc", series_name, archive_bytes, "zip")
 
-    df = _parse_archive(archive_bytes, maturity=maturity,
-                        sheet_name=sheet_name)
+    df = _parse_archive(archive_bytes, maturity=maturity, sheet_name=sheet_name)
     RAW_FRED_SCHEMA.validate(df)
 
     if save:
@@ -164,8 +163,7 @@ def _parse_archive(
                 continue
             with zf.open(member) as fh:
                 xlsx_bytes = fh.read()
-            frames.append(_parse_xlsx_bytes(
-                xlsx_bytes, maturity=maturity, sheet_name=sheet_name))
+            frames.append(_parse_xlsx_bytes(xlsx_bytes, maturity=maturity, sheet_name=sheet_name))
 
     if not frames:
         raise RuntimeError("BoE GLC archive contained no XLSX files.")
@@ -197,8 +195,7 @@ def _parse_xlsx_bytes(
     The maturity is matched against the years header by exact float equality
     (tolerance ``1e-9``), so cell type (str vs float) does not matter.
     """
-    wb = openpyxl.load_workbook(io.BytesIO(
-        xlsx_bytes), read_only=True, data_only=True)
+    wb = openpyxl.load_workbook(io.BytesIO(xlsx_bytes), read_only=True, data_only=True)
     if sheet_name not in wb.sheetnames:
         raise RuntimeError(
             f"GLC XLSX has no sheet named {sheet_name!r}; " f"sheets found: {wb.sheetnames}"

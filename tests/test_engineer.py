@@ -121,8 +121,7 @@ def test_no_future_leakage_across_pipeline() -> None:
     ] = 9999.0
 
     out_clean = engineer_features(df_clean, features_cfg=_full_features_cfg())
-    out_poisoned = engineer_features(
-        df_poisoned, features_cfg=_full_features_cfg())
+    out_poisoned = engineer_features(df_poisoned, features_cfg=_full_features_cfg())
 
     n = len(df_clean)
     engineered_cols = [
