@@ -94,6 +94,7 @@ def test_fred_rejects_null_value() -> None:
 
 # Processed quarterly
 
+
 def _synthetic_processed_frame() -> pd.DataFrame:
     return pd.DataFrame(
         {
@@ -113,13 +114,13 @@ def _synthetic_processed_frame() -> pd.DataFrame:
             "gdp_lag_4": [0.6, 0.4],
             "gdp_rolling_mean_4q": [0.2, -5.0],
             "gdp_yoy": [1.5, -20.0],
-            "cpi_yoy": [1.8, 0.5],
             "business_confidence_rolling_mean_4q": [100.0, 98.5],
+            "yield_curve_slope": [0.5, 0.3],
         }
     )
 
 
-def test_processed_quarterly_accepts_synthetic_18_column_frame() -> None:
+def test_processed_quarterly_accepts_synthetic_17_column_frame() -> None:
     FINAL_DATASET_SCHEMA.validate(_synthetic_processed_frame())
 
 
@@ -135,10 +136,10 @@ def test_processed_quarterly_rejects_missing_raw_predictor() -> None:
         FINAL_DATASET_SCHEMA.validate(df)
 
 
-def test_processed_quarterly_accepts_optional_yield_curve_slope_when_present() -> None:
-    df = _synthetic_processed_frame()
-    df["yield_curve_slope"] = [0.5, 0.3]
-    FINAL_DATASET_SCHEMA.validate(df)
+def test_processed_quarterly_rejects_missing_yield_curve_slope() -> None:
+    df = _synthetic_processed_frame().drop(columns=["yield_curve_slope"])
+    with pytest.raises(pa_errors.SchemaError):
+        FINAL_DATASET_SCHEMA.validate(df)
 
 
 def test_processed_quarterly_rejects_out_of_range_target() -> None:

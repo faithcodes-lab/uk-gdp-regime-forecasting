@@ -26,8 +26,8 @@ from src.data.downloaders._common import (
 )
 
 
-def download_fred_series(series_name: str, *, save: bool = True) -> pd.DataFrame | None:
-    """Download one FRED series by it's config name.
+def download_fred_series(series_name: str, *, save: bool = True) -> pd.DataFrame:
+    """Download one FRED series by its config name.
 
     Args:
         series_name: A key under data_sources.fred.series in pipeline.yaml.
@@ -35,7 +35,7 @@ def download_fred_series(series_name: str, *, save: bool = True) -> pd.DataFrame
             and a lineage record.
 
     Returns:
-        (date, value) DataFrame, or None if the series is deferred.
+        (date, value) DataFrame.
 
     Raises:
         RuntimeError: If FRED_API_KEY is not set or the series code is
@@ -44,15 +44,10 @@ def download_fred_series(series_name: str, *, save: bool = True) -> pd.DataFrame
     load_dotenv()
     api_key = os.environ.get("FRED_API_KEY")
     if not api_key:
-        raise RuntimeError(
-            "FRED_API_KEY is not set; add it to .env before downloading.")
+        raise RuntimeError("FRED_API_KEY is not set; add it to .env before downloading.")
 
     cfg = pipeline_config()["data_sources"]["fred"]
     series_cfg = cfg["series"][series_name]
-
-    if series_cfg.get("deferred", False):
-        logger.info("FRED {}: deferred — skipping", series_name)
-        return None
 
     code = series_cfg["code"]
     require_resolved(series_name, code=code)
@@ -89,7 +84,7 @@ def download_fred_series(series_name: str, *, save: bool = True) -> pd.DataFrame
     return df
 
 
-def download_all_fred() -> dict[str, pd.DataFrame | None]:
+def download_all_fred() -> dict[str, pd.DataFrame]:
     """Download every series under ``data_sources.fred``."""
     cfg = pipeline_config()["data_sources"]["fred"]["series"]
     return {name: download_fred_series(name) for name in cfg}

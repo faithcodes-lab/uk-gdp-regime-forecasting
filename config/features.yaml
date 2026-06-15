@@ -3,9 +3,9 @@
 # Specifies the target, the raw predictors retained in the final feature
 # matrix, intermediate-only variables that feed engineered features but
 # are dropped before model training, and the explicit list of engineered
-# features. The final feature matrix is 18 columns by design (1 target + 10 raw
-# predictors + 7 engineered features); 17 are active while
-# yield_curve_slope (= 10Y − 2Y) is deferred until the 2-year gilt is extracted from the BoE yield-curve spreadsheet.
+# features. The final feature matrix is 17 columns by design (1 target + 10 raw
+# predictors + 6 engineered features). yield_curve_slope (= 10Y − 2Y) is wired
+# in via the BoE GLC monthly archive source (boe_yc).
 
 target:
   name: gdp_growth
@@ -53,11 +53,6 @@ engineered:
     transformation: year_over_year
     periods: 4
     description: Year-on-year change in GDP
-  - name: cpi_yoy
-    source: cpi_inflation
-    transformation: year_over_year
-    periods: 4
-    description: Year-on-year change in CPI
   - name: business_confidence_rolling_mean_4q
     source: business_confidence
     transformation: rolling_mean
@@ -66,10 +61,6 @@ engineered:
   - name: yield_curve_slope
     sources: [gilt_10y_yield, gilt_2y_yield]
     transformation: subtract
-    deferred: true                   # engineer.py and downstream code must skip when deferred is true
-    description: Yield curve slope (10-year gilt yield minus 2-year gilt yield); deferred until the 2-year gilt is extracted from the BoE yield-curve spreadsheet
+    description: Yield curve slope (10-year gilt yield minus 2-year gilt yield)
 
-# Active count reflects features actually wired in. Reverts to 18 when
-# yield_curve_slope is wired in (gilt_2y_yield is downloaded at that time).
 final_column_count: 17
-final_column_count_when_slope_wired: 18

@@ -27,18 +27,16 @@ from src.data.downloaders._common import (
     write_series_lineage,
 )
 
-_QUARTER_END_MONTH_DAY = {"1": "03-31",
-                          "2": "06-30", "3": "09-30", "4": "12-31"}
+_QUARTER_END_MONTH_DAY = {"1": "03-31", "2": "06-30", "3": "09-30", "4": "12-31"}
 _MONTH_ABBR = {
     "JAN": "01", "FEB": "02", "MAR": "03", "APR": "04",
     "MAY": "05", "JUN": "06", "JUL": "07", "AUG": "08",
     "SEP": "09", "OCT": "10", "NOV": "11", "DEC": "12",
 }  # fmt: skip
-_FREQUENCY_KEY = {"quarterly": "quarters",
-                  "monthly": "months", "annual": "years"}
+_FREQUENCY_KEY = {"quarterly": "quarters", "monthly": "months", "annual": "years"}
 
 
-def download_ons_series(series_name: str, *, save: bool = True) -> pd.DataFrame | None:
+def download_ons_series(series_name: str, *, save: bool = True) -> pd.DataFrame:
     """Download one ONS series by canonical name.
 
     Args:
@@ -47,14 +45,10 @@ def download_ons_series(series_name: str, *, save: bool = True) -> pd.DataFrame 
             a lineage record. Set False for in-memory probing.
 
     Returns:
-        A ``(date, value)`` DataFrame, or ``None`` if the series is deferred.
+        A ``(date, value)`` DataFrame.
     """
     cfg = pipeline_config()["data_sources"]["ons"]
     series_cfg = cfg["series"][series_name]
-
-    if series_cfg.get("deferred", False):
-        logger.info("ONS {}: deferred — skipping", series_name)
-        return None
 
     cdid = series_cfg["cdid"]
     path = series_cfg["path"]
@@ -63,8 +57,7 @@ def download_ons_series(series_name: str, *, save: bool = True) -> pd.DataFrame 
 
     api_base = cfg["api_base"].rstrip("/")
     url = f"{api_base}/{path}/timeseries/{cdid}/{dataset}/data"
-    logger.info("ONS {} (CDID={}, dataset={}): GET {}",
-                series_name, cdid, dataset, url)
+    logger.info("ONS {} (CDID={}, dataset={}): GET {}", series_name, cdid, dataset, url)
 
     response = requests.get(url, timeout=30)
     response.raise_for_status()
@@ -92,7 +85,7 @@ def download_ons_series(series_name: str, *, save: bool = True) -> pd.DataFrame 
     return df
 
 
-def download_all_ons() -> dict[str, pd.DataFrame | None]:
+def download_all_ons() -> dict[str, pd.DataFrame]:
     """Download every series under ``data_sources.ons``."""
     cfg = pipeline_config()["data_sources"]["ons"]["series"]
     return {name: download_ons_series(name) for name in cfg}

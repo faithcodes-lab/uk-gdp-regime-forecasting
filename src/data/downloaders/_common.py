@@ -84,6 +84,9 @@ def cache_raw_response(source: str, series: str, content: bytes, ext: str) -> Pa
     ts = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     out = cache_dir / f"{series}__{ts}.{ext}"
     out.write_bytes(content)
+    # Keep the 5 most recent snapshots per (source, series, ext) so debugging
+    # is possible without letting the cache grow unbounded. Filenames sort
+    # chronologically due to the ISO timestamp embedded by the caller.
     existing = sorted(cache_dir.glob(f"{series}__*.{ext}"))
     for old in existing[:-5]:
         old.unlink()

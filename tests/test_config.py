@@ -20,13 +20,13 @@ EXPECTED_ENGINEERED_NAMES = {
     "gdp_lag_4",
     "gdp_rolling_mean_4q",
     "gdp_yoy",
-    "cpi_yoy",
     "business_confidence_rolling_mean_4q",
     "yield_curve_slope",
 }
 
 
 # pipeline.yaml
+
 
 def test_pipeline_config_loads_as_dict() -> None:
     assert isinstance(pipeline_config(), dict)
@@ -44,12 +44,13 @@ def test_pipeline_random_seed_is_42() -> None:
 
 def test_pipeline_data_sources_are_the_four_expected() -> None:
     sources = set(pipeline_config()["data_sources"].keys())
-    assert sources == {"ons", "boe", "fred"}
+    assert sources == {"ons", "boe", "fred", "boe_yc"}
 
 
 def test_pipeline_paths_include_final_dataset() -> None:
     paths = pipeline_config()["paths"]
     assert paths["final_dataset"] == "data/processed/final_dataset.parquet"
+
 
 # features.yaml
 
@@ -58,8 +59,8 @@ def test_features_target_is_gdp_growth() -> None:
     assert features_config()["target"]["name"] == "gdp_growth"
 
 
-def test_features_engineered_count_is_seven() -> None:
-    assert len(features_config()["engineered"]) == 7
+def test_features_engineered_count_is_six() -> None:
+    assert len(features_config()["engineered"]) == 6
 
 
 def test_features_engineered_names_match_spec() -> None:
@@ -72,35 +73,26 @@ def test_features_intermediate_only_lists_both_gilts() -> None:
     assert intermediate == {"gilt_2y_yield", "gilt_10y_yield"}
 
 
-def test_features_final_column_count_is_17_while_slope_deferred() -> None:
+def test_features_final_column_count_is_17() -> None:
     assert features_config()["final_column_count"] == 17
 
 
-def test_features_final_column_count_returns_to_18_when_slope_wired() -> None:
-    assert features_config()["final_column_count_when_slope_wired"] == 18
+def test_gilt_2y_yield_lives_in_boe_yc() -> None:
+    boe_yc_series = pipeline_config()["data_sources"]["boe_yc"]["series"]
+    assert "gilt_2y_yield" in boe_yc_series
 
 
-def test_yield_curve_slope_is_deferred() -> None:
-    engineered = features_config()["engineered"]
-    slope = next(
-        item for item in engineered if item["name"] == "yield_curve_slope")
-    assert slope.get("deferred") is True
+def test_gilt_10y_yield_lives_in_boe_yc() -> None:
+    boe_yc_series = pipeline_config()["data_sources"]["boe_yc"]["series"]
+    assert "gilt_10y_yield" in boe_yc_series
 
 
-def test_active_engineered_count_is_six() -> None:
-    engineered = features_config()["engineered"]
-    active = [item for item in engineered if not item.get("deferred", False)]
-    assert len(active) == 6
+def test_gilts_no_longer_under_boe_or_fred() -> None:
+    boe = pipeline_config()["data_sources"]["boe"]["series"]
+    fred = pipeline_config()["data_sources"]["fred"]["series"]
+    assert "gilt_2y_yield" not in boe
+    assert "gilt_10y_yield" not in fred
 
-
-def test_gilt_2y_yield_is_deferred_in_pipeline_config() -> None:
-    boe_series = pipeline_config()["data_sources"]["boe"]["series"]
-    assert boe_series["gilt_2y_yield"].get("deferred") is True
-
-
-def test_gilt_10y_yield_is_not_deferred() -> None:
-    boe_or_fred = pipeline_config()["data_sources"]["fred"]["series"]
-    assert boe_or_fred["gilt_10y_yield"].get("deferred", False) is False
 
 # regimes.yaml
 

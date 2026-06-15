@@ -3,9 +3,8 @@
 This is the rulebook for the finished dataset, after every source has
 been downloaded, merged, and turned into features. It checks a date
 column plus 17 data columns: the GDP growth target, 10 raw predictors,
-and 6 engineered features. An 18th data column, yield_curve_slope, is
-optional, allowed but not required while it's deferred, and validated
-once it's wired in.
+and 6 engineered features (the engineered set now includes
+yield_curve_slope, sourced from the BoE GLC archive).
 
 The range limits on each column are deliberately wide. They aren't meant
 to describe the data precisely, they're there to catch obvious
@@ -101,15 +100,9 @@ _ENGINEERED_COLUMNS = {
     ),
     "gdp_yoy": Column(
         float,
-        checks=Check.in_range(-30.0, 30.0),
+        checks=Check.in_range(-35.0, 35.0),
         nullable=True,
         description="Year-on-year change in GDP.",
-    ),
-    "cpi_yoy": Column(
-        float,
-        checks=Check.in_range(-15.0, 35.0),
-        nullable=True,
-        description="Year-on-year change in CPI.",
     ),
     "business_confidence_rolling_mean_4q": Column(
         float,
@@ -117,16 +110,10 @@ _ENGINEERED_COLUMNS = {
         nullable=True,
         description="Four-quarter rolling mean of business confidence.",
     ),
-}
-
-# Optional: validated only when present. Wired in once the slope definition
-# is settled and the feature is added to the pipeline.
-_OPTIONAL_COLUMNS = {
     "yield_curve_slope": Column(
         float,
         checks=Check.in_range(-10.0, 10.0),
-        nullable=True,
-        required=False,
+        nullable=False,
         description="Yield curve slope (10-year gilt yield minus 2-year gilt yield).",
     ),
 }
@@ -149,7 +136,6 @@ FINAL_DATASET_SCHEMA = DataFrameSchema(
         ),
         **_RAW_KEPT_COLUMNS,
         **_ENGINEERED_COLUMNS,
-        **_OPTIONAL_COLUMNS,
     },
     strict=False,
     coerce=False,

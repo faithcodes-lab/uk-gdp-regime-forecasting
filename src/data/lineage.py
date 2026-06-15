@@ -5,7 +5,7 @@ under data/lineage/). Each record stores the source the data came from,
 where the output was written, what was done to it, the parameters used,
 when it ran (UTC), and the git commit the code was on at the time.
 
-write_lineage saves a record; read_lineage loads it back. 
+write_lineage saves a record; read_lineage loads it back.
 """
 
 from __future__ import annotations

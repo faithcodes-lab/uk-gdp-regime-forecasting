@@ -16,6 +16,7 @@ import pytest
 
 import src.data.downloaders._common as common_mod
 import src.data.downloaders.boe as boe_mod
+import src.data.downloaders.boe_yc as boe_yc_mod
 import src.data.downloaders.fred as fred_mod
 import src.data.downloaders.ons as ons_mod
 from src.data.downloaders._common import PENDING_SENTINEL
@@ -23,7 +24,7 @@ from src.data.downloaders._common import PENDING_SENTINEL
 # Sentinel rejection
 
 
-def _fake_ons_cfg(cdid: str, *, deferred: bool = False) -> dict:
+def _fake_ons_cfg(cdid: str) -> dict:
     return {
         "data_sources": {
             "ons": {
@@ -34,7 +35,6 @@ def _fake_ons_cfg(cdid: str, *, deferred: bool = False) -> dict:
                         "path": "test/path",
                         "dataset": "testds",
                         "frequency": "quarterly",
-                        "deferred": deferred,
                     },
                 },
             },
@@ -42,7 +42,7 @@ def _fake_ons_cfg(cdid: str, *, deferred: bool = False) -> dict:
     }
 
 
-def _fake_boe_cfg(code: str, url: str, *, deferred: bool = False) -> dict:
+def _fake_boe_cfg(code: str, url: str) -> dict:
     return {
         "data_sources": {
             "boe": {
@@ -52,7 +52,6 @@ def _fake_boe_cfg(code: str, url: str, *, deferred: bool = False) -> dict:
                         "code": code,
                         "url": url,
                         "frequency": "monthly",
-                        "deferred": deferred,
                     },
                 },
             },
@@ -60,7 +59,7 @@ def _fake_boe_cfg(code: str, url: str, *, deferred: bool = False) -> dict:
     }
 
 
-def _fake_fred_cfg(code: str, *, deferred: bool = False) -> dict:
+def _fake_fred_cfg(code: str) -> dict:
     return {
         "data_sources": {
             "fred": {
@@ -71,7 +70,6 @@ def _fake_fred_cfg(code: str, *, deferred: bool = False) -> dict:
                     "test_series": {
                         "code": code,
                         "frequency": "monthly",
-                        "deferred": deferred,
                     },
                 },
             },
@@ -108,32 +106,6 @@ def test_fred_refuses_when_api_key_missing(monkeypatch: pytest.MonkeyPatch) -> N
     monkeypatch.setattr(fred_mod, "load_dotenv", lambda *_a, **_kw: None)
     with pytest.raises(RuntimeError, match="FRED_API_KEY"):
         fred_mod.download_fred_series("test_series", save=False)
-
-
-# Deferred skip
-
-
-def test_ons_skips_deferred_series(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(ons_mod, "pipeline_config",
-                        lambda: _fake_ons_cfg("ANY", deferred=True))
-    assert ons_mod.download_ons_series("test_series", save=False) is None
-
-
-def test_boe_skips_deferred_2y_gilt(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(
-        boe_mod,
-        "pipeline_config",
-        lambda: _fake_boe_cfg(
-            PENDING_SENTINEL, PENDING_SENTINEL, deferred=True),
-    )
-    assert boe_mod.download_boe_series("test_series", save=False) is None
-
-
-def test_fred_skips_deferred_series(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(fred_mod, "pipeline_config",
-                        lambda: _fake_fred_cfg("ANY", deferred=True))
-    monkeypatch.setenv("FRED_API_KEY", "test_key")
-    assert fred_mod.download_fred_series("test_series", save=False) is None
 
 
 # Parsers
@@ -250,7 +222,7 @@ def test_ons_end_to_end_writes_artefacts(monkeypatch: pytest.MonkeyPatch, tmp_pa
                         lambda *_a, **_kw: fake_response)
 
     df = ons_mod.download_ons_series("gdp_growth", save=True)
-    assert df is not None and len(df) == 3
+    assert len(df) == 3
 
     csv_path = tmp_path / "data" / "raw" / "ons" / "gdp_growth.csv"
     assert csv_path.exists()
@@ -281,7 +253,7 @@ def test_fred_end_to_end_writes_artefacts(monkeypatch: pytest.MonkeyPatch, tmp_p
                         lambda *_a, **_kw: fake_response)
 
     df = fred_mod.download_fred_series("test_series", save=True)
-    assert df is not None and len(df) == 2
+    assert len(df) == 2
 
     csv_path = tmp_path / "data" / "raw" / "fred" / "test_series.csv"
     assert csv_path.exists()
@@ -313,10 +285,245 @@ def test_cache_raw_response_keeps_only_last_five(
 @pytest.mark.integration
 def test_ons_gdp_growth_real_download() -> None:
     df = ons_mod.download_ons_series("gdp_growth", save=False)
-    assert df is not None and len(df) > 80
+    assert len(df) > 80
 
 
 @pytest.mark.integration
 def test_fred_brent_oil_real_download() -> None:
     df = fred_mod.download_fred_series("brent_oil", save=False)
-    assert df is not None and len(df) > 100
+    assert len(df) > 100
+
+
+# BoE Yield Curve (boe_yc): zip archive of GLC monthly spot-curve XLSX files
+
+
+def _fake_boe_yc_cfg() -> dict:
+    # Synthetic boe_yc block exercising both maturities; archive URL is dummy
+    # because tests mock the HTTP fetch.
+    return {
+        "data_sources": {
+            "boe_yc": {
+                "archive_url": "https://example.test/glc.zip",
+                "sheet_name": "4. spot curve",
+                "series": {
+                    "gilt_2y_yield": {
+                        "maturity_years": 2.0,
+                        "frequency": "monthly",
+                        "aggregation": "end_of_period",
+                    },
+                    "gilt_10y_yield": {
+                        "maturity_years": 10.0,
+                        "frequency": "monthly",
+                        "aggregation": "end_of_period",
+                    },
+                },
+            },
+        },
+    }
+
+
+def _make_synthetic_glc_xlsx(
+    years_cols: list[float],
+    dates: list,
+    values_by_maturity: dict,
+) -> bytes:
+    # Build a 1-sheet XLSX mirroring the GLC "4. spot curve" layout:
+    #   row 0: title, row 1: blank, row 2: "Maturity",
+    #   row 3: "years:" plus maturity headers,
+    #   row 4+: month-end date + spot yields at each maturity.
+    import io as _io
+
+    import openpyxl
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "4. spot curve"
+    ws.cell(row=1, column=2, value="UK nominal spot curve")
+    ws.cell(row=3, column=1, value="Maturity")
+    ws.cell(row=4, column=1, value="years:")
+    for i, m in enumerate(years_cols, start=2):
+        ws.cell(row=4, column=i, value=m)
+    for r_idx, date in enumerate(dates, start=5):
+        ws.cell(row=r_idx, column=1, value=date)
+        for c_idx, m in enumerate(years_cols, start=2):
+            ws.cell(row=r_idx, column=c_idx,
+                    value=values_by_maturity[m][r_idx - 5])
+
+    buf = _io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
+
+def _make_synthetic_archive(xlsx_files: list) -> bytes:
+    # Pack one or more (filename, bytes) pairs into a ZIP archive in memory.
+    import io as _io
+    import zipfile
+
+    buf = _io.BytesIO()
+    with zipfile.ZipFile(buf, mode="w") as zf:
+        for name, content in xlsx_files:
+            zf.writestr(name, content)
+    return buf.getvalue()
+
+
+def test_boe_yc_rejects_html_response_with_zip_signature_guard(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # BoE serves error pages with HTTP 200 plus HTML body; the downloader must
+    # refuse anything whose first four bytes are not the ZIP signature.
+    boe_yc_mod._archive_cache.clear()
+    monkeypatch.setattr(boe_yc_mod, "pipeline_config",
+                        lambda: _fake_boe_yc_cfg())
+
+    fake = MagicMock()
+    fake.content = b"<!DOCTYPE html><html><body>Service unavailable</body></html>"
+    fake.raise_for_status = MagicMock()
+    monkeypatch.setattr(boe_yc_mod.requests, "get", lambda *_a, **_kw: fake)
+
+    with pytest.raises(RuntimeError, match="ZIP|HTML"):
+        boe_yc_mod.download_boe_yc_series("gilt_2y_yield", save=False)
+
+
+def test_boe_yc_parses_synthetic_archive_for_both_maturities(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    boe_yc_mod._archive_cache.clear()
+    monkeypatch.setattr(boe_yc_mod, "pipeline_config",
+                        lambda: _fake_boe_yc_cfg())
+
+    years_cols = [0.5, 1.0, 1.5, 2.0, 2.5, 5.0, 10.0]
+    dates = [pd.Timestamp("2020-01-31"), pd.Timestamp("2020-02-29")]
+    values_by_maturity = {
+        0.5: [0.10, 0.11],
+        1.0: [0.20, 0.21],
+        1.5: [0.30, 0.31],
+        2.0: [0.40, 0.50],  # 2-year column
+        2.5: [0.55, 0.56],
+        5.0: [1.20, 1.22],
+        10.0: [1.50, 1.70],  # 10-year column
+    }
+    xlsx = _make_synthetic_glc_xlsx(years_cols, dates, values_by_maturity)
+    archive = _make_synthetic_archive([("synth.xlsx", xlsx)])
+
+    fake = MagicMock()
+    fake.content = archive
+    fake.raise_for_status = MagicMock()
+    monkeypatch.setattr(boe_yc_mod.requests, "get", lambda *_a, **_kw: fake)
+
+    df2 = boe_yc_mod.download_boe_yc_series("gilt_2y_yield", save=False)
+    assert list(df2["date"]) == dates
+    assert list(df2["value"]) == [0.40, 0.50]
+
+    df10 = boe_yc_mod.download_boe_yc_series("gilt_10y_yield", save=False)
+    assert list(df10["value"]) == [1.50, 1.70]
+
+
+def test_boe_yc_concatenates_across_multiple_xlsx_files(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Mirrors the real archive's three-file split; concatenated rows should
+    # cover both periods without duplication.
+    boe_yc_mod._archive_cache.clear()
+    monkeypatch.setattr(boe_yc_mod, "pipeline_config",
+                        lambda: _fake_boe_yc_cfg())
+
+    years_cols = [2.0, 10.0]
+    xlsx_old = _make_synthetic_glc_xlsx(
+        years_cols,
+        [pd.Timestamp("2019-12-31")],
+        {2.0: [0.30], 10.0: [1.20]},
+    )
+    xlsx_new = _make_synthetic_glc_xlsx(
+        years_cols,
+        [pd.Timestamp("2020-01-31")],
+        {2.0: [0.40], 10.0: [1.50]},
+    )
+    archive = _make_synthetic_archive(
+        [("old.xlsx", xlsx_old), ("new.xlsx", xlsx_new)])
+
+    fake = MagicMock()
+    fake.content = archive
+    fake.raise_for_status = MagicMock()
+    monkeypatch.setattr(boe_yc_mod.requests, "get", lambda *_a, **_kw: fake)
+
+    df = boe_yc_mod.download_boe_yc_series("gilt_2y_yield", save=False)
+    assert len(df) == 2
+    assert list(df["date"]) == [pd.Timestamp(
+        "2019-12-31"), pd.Timestamp("2020-01-31")]
+    assert list(df["value"]) == [0.30, 0.40]
+
+
+def test_boe_yc_raises_when_maturity_missing_from_header(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    boe_yc_mod._archive_cache.clear()
+    # Build an archive whose XLSX header has no 10-year column; the 10y
+    # downloader should raise rather than silently return nothing.
+    monkeypatch.setattr(boe_yc_mod, "pipeline_config",
+                        lambda: _fake_boe_yc_cfg())
+    years_cols = [0.5, 1.0, 2.0]  # no 10.0
+    xlsx = _make_synthetic_glc_xlsx(
+        years_cols,
+        [pd.Timestamp("2020-01-31")],
+        {0.5: [0.1], 1.0: [0.2], 2.0: [0.4]},
+    )
+    archive = _make_synthetic_archive([("synth.xlsx", xlsx)])
+
+    fake = MagicMock()
+    fake.content = archive
+    fake.raise_for_status = MagicMock()
+    monkeypatch.setattr(boe_yc_mod.requests, "get", lambda *_a, **_kw: fake)
+
+    with pytest.raises(RuntimeError, match="No column.*maturity 10"):
+        boe_yc_mod.download_boe_yc_series("gilt_10y_yield", save=False)
+
+
+def test_boe_yc_e2e_writes_artefacts(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    _redirect_outputs(monkeypatch, tmp_path)
+    boe_yc_mod._archive_cache.clear()
+    monkeypatch.setattr(boe_yc_mod, "pipeline_config",
+                        lambda: _fake_boe_yc_cfg())
+
+    xlsx = _make_synthetic_glc_xlsx(
+        [2.0, 10.0],
+        [pd.Timestamp("2020-01-31")],
+        {2.0: [0.40], 10.0: [1.50]},
+    )
+    archive = _make_synthetic_archive([("synth.xlsx", xlsx)])
+    fake = MagicMock()
+    fake.content = archive
+    fake.raise_for_status = MagicMock()
+    monkeypatch.setattr(boe_yc_mod.requests, "get", lambda *_a, **_kw: fake)
+
+    df = boe_yc_mod.download_boe_yc_series("gilt_2y_yield", save=True)
+    assert len(df) > 0
+
+    # Raw CSV, lineage, and cached archive zip should all be written
+    csv_path = tmp_path / "data" / "raw" / "boe_yc" / "gilt_2y_yield.csv"
+    assert csv_path.exists()
+
+    lineage_path = tmp_path / "data" / "lineage" / \
+        "boe_yc__gilt_2y_yield.lineage.json"
+    assert lineage_path.exists()
+    record = json.loads(lineage_path.read_text(encoding="utf-8"))
+    assert record["source"] == "boe_yc:GLC_2.0y_nominal_spot"
+    assert "verify_zip_signature" in record["transformations"]
+
+    cache_dir = tmp_path / "data" / "raw" / "_api_responses" / "boe_yc"
+    cached = list(cache_dir.glob("gilt_2y_yield__*.zip"))
+    assert len(cached) == 1
+
+
+@pytest.mark.integration
+def test_boe_yc_gilt_2y_real_download() -> None:
+    boe_yc_mod._archive_cache.clear()
+    df = boe_yc_mod.download_boe_yc_series("gilt_2y_yield", save=False)
+    # Archive covers 1970 onwards; we expect at least 300 monthly rows.
+    assert len(df) > 300
+
+
+@pytest.mark.integration
+def test_boe_yc_gilt_10y_real_download() -> None:
+    boe_yc_mod._archive_cache.clear()
+    df = boe_yc_mod.download_boe_yc_series("gilt_10y_yield", save=False)
+    assert len(df) > 300

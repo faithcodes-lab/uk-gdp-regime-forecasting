@@ -3,9 +3,9 @@
 Exposes cached, typed accessors for the three YAML configuration files
 under config/:
 
-* :func:`pipeline_config`: data sources, paths, project metadata
-* :func:`features_config`: target, predictors, engineered features
-* :func:`regimes_config` : the six economic regime definitions
+:func:`pipeline_config`: data sources, paths, project metadata
+:func:`features_config`: target, predictors, engineered features
+:func:`regimes_config` : the six economic regime definitions
 
 Each loader is cached with :func:`functools.lru_cache` so repeated calls
 re use the parsed dict rather than re-reading the file.
@@ -40,6 +40,7 @@ def _load(filename: str) -> dict[str, Any]:
     path = _CONFIG_DIR / filename
     with path.open("r", encoding="utf-8") as handle:
         return yaml.safe_load(handle)
+
 
 # cache the result so the file is read from disk only once
 
