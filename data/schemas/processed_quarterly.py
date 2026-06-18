@@ -142,6 +142,16 @@ FINAL_DATASET_SCHEMA = DataFrameSchema(
         ),
         **_RAW_KEPT_COLUMNS,
         **_ENGINEERED_COLUMNS,
+        "regime": Column(
+            str,
+            nullable=False,
+            required=False,
+            description=(
+                "Regime label from config/regimes.yaml. Added post-pipeline "
+                "by scripts/add_regime_column.py; the base `make data` run "
+                "does not include this column."
+            ),
+        ),
     },
     strict=False,
     coerce=False,

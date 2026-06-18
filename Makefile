@@ -1,7 +1,7 @@
 # Makefile for UK GDP Regime Forecasting
 # Run `make help` to see available targets.
 
-.PHONY: help install download process data eda all test lint format format-check clean
+.PHONY: help install download process data eda regimes all test lint format format-check clean
 
 help:
 	@echo "Available targets:"
@@ -10,6 +10,7 @@ help:
 	@echo "  process       Build final dataset from cached raw CSVs (skips downloads)"
 	@echo "  data          End-to-end: download + process; writes data/processed/final_dataset.parquet"
 	@echo "  eda           Run exploratory data analysis; writes results/figures/eda/ and results/eda-summary.md"
+	@echo "  regimes       Add regime column to final dataset (run after 'make data'); writes data/processed/final_dataset.parquet"
 	@echo "  all           Build dataset, run tests, run lint, check formatting"
 	@echo "  test          Run the pytest suite"
 	@echo "  lint          Run ruff linter"
@@ -31,6 +32,9 @@ data:
 
 eda:
 	PYTHONPATH=. python scripts/eda.py
+
+regimes:
+	PYTHONPATH=. python scripts/add_regime_column.py
 
 all: data test lint format-check
 
