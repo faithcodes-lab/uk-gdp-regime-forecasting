@@ -46,3 +46,6 @@ data/user-needs/.tmp-form-pages/
 
 # Logs
 logs/*.log
+
+# R session history (stray when an R kernel opens a working file)
+.Rhistory
