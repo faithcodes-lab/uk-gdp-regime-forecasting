@@ -205,7 +205,7 @@ Options considered:
 
   C. Both Chow and Bai-Perron
 Decision: C. Chow is applied at each of the five hypothesised boundaries; Bai-Perron is run as an unsupervised sensitivity sweep on the same series.
-Rationale: The two methods answer different questions. Chow asks whether the regression differs on either side of a specific date, which is the natural test for literature-motivated boundaries. Bai-Perron asks where the data themselves would place breaks if no dates were imposed, providing independent statistical validation. Running both makes agreement informative and disagreement transparent. The cost of running both is small (two short scripts; ruptures was already a planned dependency).
+Rationale: The two methods answer different questions. Chow asks whether the regression differs on either side of a specific date, which is the natural test for literature-motivated boundaries. Bai-Perron asks where the data themselves would place breaks if no dates were imposed, providing independent statistical evidence. Running both makes agreement informative and disagreement transparent. The cost of running both is small (two short scripts; ruptures was already a planned dependency).
 
 ---
 
@@ -219,7 +219,7 @@ Options considered:
 
   C. Both literature and statistical tests, with explicit convergence framing
 Decision: C
-Rationale: Literature alone is interpretable but offers no internal validation. Statistics alone is methodologically pure but loses the economic narrative (a break at 2008 Q3 is harder to defend than the onset of the global financial crisis). Combining the two converts methodological agreement into mutually reinforcing evidence and converts disagreement into a question the methodology chapter must address openly rather than hide. This was the supervisor's explicit recommendation in Meeting 1.
+Rationale: Literature alone is interpretable but offers no independent statistical evidence. Statistics alone is methodologically pure but loses the economic narrative (a break at 2008 Q3 is harder to defend than the onset of the global financial crisis). Combining the two converts methodological agreement into mutually reinforcing evidence and converts disagreement into a question the methodology chapter must address openly rather than hide. This was the supervisor's explicit recommendation in Meeting 1.
 
 ---
 
@@ -259,6 +259,28 @@ Options considered:
 
   C. Add a variance-targeted change-point test as a third instrument, on the grounds that the GFC is a volatility event rather than a level event
 Decision: C. The ICSS test (Inclan-Tiao 1994) is now a standard part of the structural-breaks methodology alongside Chow and Bai-Perron. It is implemented in src/regimes/volatility.py and orchestrated by src/regimes/run_analysis.py; results are written to results/regimes/icss_results.json with a GFC-validation block.
-Rationale: Chow tests differences in regression coefficients (mean structure) and Bai-Perron with the rbf kernel is in principle sensitive to changes in distribution, but at standard penalties on a 104-quarter sample it returned no breaks. Neither instrument is calibrated to detect a pure variance shift, which is what the 2008 crisis was for UK GDP. ICSS targets the second moment directly via CUSUM-of-squares applied recursively. On the live series it detects two variance breaks inside the 2008 Q1 to 2009 Q4 window (2008-06-30 with D = 2.993; 2009-09-30 with D = 3.319), confirming that a structural break in volatility is present in the GFC regime as currently defined. The 2008 boundary is therefore validated by the methodology.
+Rationale: Chow tests differences in regression coefficients (mean structure) and Bai-Perron with the rbf kernel is in principle sensitive to changes in distribution, but at standard penalties on a 104-quarter sample it returned no breaks. Neither instrument is calibrated to detect a pure variance shift, which is what the 2008 crisis was for UK GDP. ICSS targets the second moment directly via CUSUM-of-squares applied recursively. On the live series it detects two variance breaks inside the 2008 Q1 to 2009 Q4 window (2008-06-30 with D = 2.993; 2009-09-30 with D = 3.319), providing evidence of a volatility shift inside the GFC regime as currently defined. Chow and Bai-Perron find evidence of mean shifts; ICSS finds evidence of volatility shifts. These are different kinds of structural change, and a test finding evidence of a shift does not by itself confirm a regime boundary.
 
-Open item (separate from the test decision above): the exact GFC and Post-GFC Recovery boundary dates are still under discussion with the supervisor. Specifically, the GFC start date may move from 2008 Q1 (current config) to 2008 Q2 (closer to the first ICSS variance break at 2008-06-30), and the Post-GFC Recovery start date may move from 2010 Q1 (current config) to 2009 Q4 (closer to the second ICSS variance break at 2009-09-30). No boundary in config/regimes.yaml has been moved. Any change to the boundary dates will be recorded as a separate decision-log entry once the supervisor has confirmed.
+Open item (separate from the test decision above): the exact GFC and Post-GFC Recovery boundary dates are still under discussion with the supervisor. Specifically, the GFC start date may move from 2008 Q1 (current config) to 2008 Q2 (closer to the first ICSS variance break at 2008-06-30), and the Post-GFC Recovery start date may move from 2010 Q1 (current config) to 2009 Q4 (closer to the second ICSS variance break at 2009-09-30). No boundary in config/regimes.yaml has been moved. Any change to the boundary dates will be recorded as a separate decision-log entry once the supervisor has confirmed. Resolved on 26-06-2026 by the Regime boundary dating rule entry.
+
+---
+
+## Decision: Regime boundary dating rule
+Date: 26-06-2026
+Question: How should the regime boundary dates be chosen in a consistent, defensible way, after the supervisor advised choosing boundaries by a clear rule rather than defending one set of dates as the single correct answer?
+Options considered:
+  A. Peak-based dating (a regime starts at the cyclical peak). Rejected, because it would force the COVID boundary back to 2019 Q4 to stay consistent, which is not sensible.
+
+  B. Ad hoc dating per regime (choose each boundary individually). Rejected, because it is inconsistent and hard to defend in the viva.
+
+  C. A single rule applied across all regimes: a regime begins in the first quarter that belongs substantively to the new state. For a crisis, the first quarter of GDP contraction; for a recovery, the first quarter of sustained renewed growth; for Brexit, the first full quarter after the referendum; the baseline starts at the data window. Chosen.
+Decision: C. This moved two boundaries to comply with the rule:
+  - GFC start from 2008 Q1 to 2008 Q2 (the first quarter GDP actually contracted)
+  - Post-GFC Recovery start from 2010 Q1 to 2009 Q4 (the first quarter growth resumed)
+
+  The other three internal boundaries (Brexit 2016 Q3, COVID 2020 Q1, Post-COVID 2021 Q3) and the 2000 Q1 baseline start already complied and were unchanged. New per-regime quarter counts: 33, 6, 27, 14, 6, 18, summing to 104.
+Rationale:
+  - The rule makes the GFC and COVID boundaries consistent with each other: both are now dated from the first contraction quarter. Under the old dates the GFC was peak-dated while COVID was contraction-dated, which was the inconsistency the rule removes.
+  - Both moved dates have independent corroboration beyond the rule. 2008 Q2 is the technical recession start and is where the ICSS variance break falls. 2009 Q4 is when the UK officially exited recession and is close to the ICSS variance-down break at 2009 Q3.
+  - Two judgement calls are acknowledged openly. First, the Pre-GFC Stability label now covers 2008 Q1; this is defensible because regimes are defined by GDP behaviour and GDP was still growing in 2008 Q1, even though the financial sector was already under stress. Second, the Post-COVID Recovery start at 2021 Q3 reflects sustained recovery; a brief rebound in 2020 Q3 was reversed by renewed restrictions, so the literal first quarter of renewed growth is not the right marker.
+  - Alternative boundary dates remain plausible and this will be stated in the writeup. A contained sensitivity check on one alternative date set is planned if time allows, to show whether the headline results are robust to the choice.

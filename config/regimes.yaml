@@ -7,18 +7,18 @@ regimes:
   - id: 1
     label: Pre-GFC Stability
     start: 2000-01-01
-    end: 2007-12-31
-    quarters: 32
+    end: 2008-03-31
+    quarters: 33
   - id: 2
     label: Global Financial Crisis
-    start: 2008-01-01
-    end: 2009-12-31
-    quarters: 8
+    start: 2008-04-01
+    end: 2009-09-30
+    quarters: 6
   - id: 3
     label: Post-GFC Recovery
-    start: 2010-01-01
+    start: 2009-10-01
     end: 2016-06-30
-    quarters: 26
+    quarters: 27
   - id: 4
     label: Brexit Transition
     start: 2016-07-01

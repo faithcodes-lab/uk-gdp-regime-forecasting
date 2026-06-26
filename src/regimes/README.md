@@ -76,4 +76,4 @@ The test itself is a standard part of the methodology. The exact GFC and Post-GF
 
 ## Why this package exists
 
-The dissertation's novel contribution is regime-aware SHAP analysis. That analysis only makes sense if the regime definitions are defensible. This package produces the evidence base for that defence: literature-motivated boundaries from `config/regimes.yaml`, statistical validation from the three break tests (Chow, Bai-Perron, ICSS), and a clean figure for the methodology chapter. Methodological decisions made here are recorded in `report/decision-log.md`.
+The dissertation's novel contribution is regime-aware SHAP analysis. That analysis only makes sense if the regime definitions are defensible. This package produces the evidence base for that defence: literature-motivated boundaries from `config/regimes.yaml`, statistical evidence from the three break tests (Chow, Bai-Perron, ICSS), and a clean figure for the methodology chapter. Methodological decisions made here are recorded in `report/decision-log.md`.
