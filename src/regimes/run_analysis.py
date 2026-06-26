@@ -17,14 +17,14 @@ What this script does
 - Runs the ICSS variance break test (Inclan-Tiao 1994) on
   ``gdp_growth`` to look for variance shifts. The result is annotated
   with a GFC-validation block: any detected break whose date falls
-  inside the GFC regime window (2008 Q1 to 2009 Q4 inclusive) is
-  reported with its distance, in quarters, from 2008 Q1.
+  inside the GFC regime window (2008 Q2 to 2009 Q3 inclusive) is
+  reported with its distance, in quarters, from the GFC start.
 - Writes four artefacts into ``results/regimes/``:
 
     * ``chow_test_results.json`` (one entry per boundary)
     * ``bai_perron_sweep.json``  (full per-penalty break dates)
     * ``bai_perron_sensitivity.csv`` (direct dump of ``tune_penalty``)
-    * ``icss_results.json`` (variance break test + GFC validation)
+    * ``icss_results.json`` (variance break test + GFC evidence)
 
 - Prints a short human-readable summary via loguru.
 
@@ -174,11 +174,11 @@ def _gfc_regime_window() -> tuple[pd.Timestamp, pd.Timestamp]:
 def _run_icss(df: pd.DataFrame) -> dict:
     """Run the ICSS variance break test on gdp_growth; build the JSON payload.
 
-    The payload includes a ``gfc_validation`` block that lists every
-    detected break falling inside the GFC regime window (2008 Q1 to
-    2009 Q4 inclusive) and reports each break's distance, in quarters,
-    from 2008 Q1. ``validated`` is True when at least one break falls
-    inside the window.
+    The payload includes a ``gfc_evidence`` block that lists every
+    detected break falling inside the GFC regime window (2008 Q2 to
+    2009 Q3 inclusive) and reports each break's distance, in quarters,
+    from the GFC start. ``evidence_inside_window`` is True when at least one
+    break falls inside the window.
     """
     series = df.set_index("date")[_TARGET]
     result = icss_test(series, alpha=_ICSS_ALPHA)
@@ -195,7 +195,7 @@ def _run_icss(df: pd.DataFrame) -> dict:
                 {
                     "date": date.strftime("%Y-%m-%d"),
                     "d_statistic": float(stat),
-                    "quarters_from_2008_q1": int(date_q.ordinal - gfc_start_q.ordinal),
+                    "quarters_from_gfc_start": int(date_q.ordinal - gfc_start_q.ordinal),
                 }
             )
 
@@ -210,14 +210,14 @@ def _run_icss(df: pd.DataFrame) -> dict:
             {"date": d.strftime("%Y-%m-%d"), "d_statistic": float(s)}
             for d, s in zip(result.breakpoint_dates, result.d_statistics)
         ],
-        "gfc_validation": {
+        "gfc_evidence": {
             "expected_boundary": gfc_start.strftime("%Y-%m-%d"),
             "gfc_regime_window": [
                 gfc_start.strftime("%Y-%m-%d"),
                 gfc_end.strftime("%Y-%m-%d"),
             ],
             "breaks_inside_window": breaks_inside,
-            "validated": bool(breaks_inside),
+            "evidence_inside_window": bool(breaks_inside),
         },
     }
 
@@ -301,24 +301,23 @@ def _print_summary(
     for bp in icss_payload["breakpoints"]:
         logger.info("  {}  D={:.3f}", bp["date"], bp["d_statistic"])
 
-    gfc = icss_payload["gfc_validation"]
+    gfc = icss_payload["gfc_evidence"]
     window = gfc["gfc_regime_window"]
-    if gfc["validated"]:
+    if gfc["evidence_inside_window"]:
         logger.info(
-            "GFC validation: PASS. {} break(s) inside the GFC regime window " "({} to {}):",
-            len(gfc["breaks_inside_window"]),
+            "GFC evidence: variance break(s) found inside the GFC window ({} to {}):",
             window[0],
             window[1],
         )
         for b in gfc["breaks_inside_window"]:
             logger.info(
-                "  {}  (Q+{} from 2008 Q1)",
+                "  {}  (Q+{} from GFC start)",
                 b["date"],
-                b["quarters_from_2008_q1"],
+                b["quarters_from_gfc_start"],
             )
     else:
         logger.info(
-            "GFC validation: FAIL. No ICSS break inside the GFC regime window " "({} to {}).",
+            "GFC evidence: no variance break inside the GFC window ({} to {}).",
             window[0],
             window[1],
         )

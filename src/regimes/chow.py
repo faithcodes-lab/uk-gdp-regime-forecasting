@@ -13,11 +13,11 @@ where ``k_params = features + 1`` because an intercept is always added via
 
 Both the input ``dates`` and ``breakpoint_date`` are normalised to the
 quarter-start of the quarter they fall in before comparison. The project
-dataset stores quarter-end dates (e.g. 2008-03-31 for Q1 2008) and the
+dataset stores quarter-end dates (e.g. 2008-06-30 for Q2 2008) and the
 regime boundaries in ``config/regimes.yaml`` are quarter-start (e.g.
-2008-01-01 for the GFC onset). After normalisation, the comparison
+2008-04-01 for the GFC onset). After normalisation, the comparison
 ``dates_q_start < breakpoint_q_start`` is unambiguous and routes the
-boundary quarter (Q1 2008 in the example) to the post-period, as
+boundary quarter (Q2 2008 in the example) to the post-period, as
 intended.
 """
 
@@ -111,8 +111,8 @@ def chow_test(
     dates_clean = combined["__date__"]
 
     # Normalise both sides of the comparison to quarter-start so the
-    # boundary quarter (a quarter-end date in the dataset, e.g. 2008-03-31)
-    # lands in the post-period when its quarter-start (2008-01-01) is not
+    # boundary quarter (a quarter-end date in the dataset, e.g. 2008-06-30)
+    # lands in the post-period when its quarter-start (2008-04-01) is not
     # strictly less than the breakpoint's quarter-start.
     sample_q_start = dates_clean.dt.to_period("Q").dt.to_timestamp()
     break_q_start = breakpoint.to_period("Q").to_timestamp()

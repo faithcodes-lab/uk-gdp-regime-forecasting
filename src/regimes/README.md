@@ -40,7 +40,7 @@ Each target is independent and idempotent. `make regimes` reads from `config/reg
 
 ## Date-basis convention
 
-The dataset stores quarter-end dates (for example 2008-03-31 for Q1 2008); `config/regimes.yaml` stores quarter-start dates (for example 2008-01-01 for the GFC). Every module in this package normalises both sides to quarter-start before comparing, so the boundary quarter (Q1 2008 in the example) routes to the new regime regardless of which date basis the caller supplies.
+The dataset stores quarter-end dates (for example 2008-06-30 for Q2 2008); `config/regimes.yaml` stores quarter-start dates (for example 2008-04-01 for the GFC). Every module in this package normalises both sides to quarter-start before comparing, so the boundary quarter (Q2 2008 in the example) routes to the new regime regardless of which date basis the caller supplies.
 
 ## Break-index to date convention
 
@@ -65,12 +65,12 @@ Each test file is self-contained and uses synthetic data; only `tests/test_visua
 | `results/regimes/chow_test_results.json` | `run_analysis.py` | F statistic and p-value at each of the five hypothesised boundaries |
 | `results/regimes/bai_perron_sweep.json` | `run_analysis.py` | All breakpoints detected at each penalty in the grid |
 | `results/regimes/bai_perron_sensitivity.csv` | `run_analysis.py` | Same content, flat CSV for quick eyeballing |
-| `results/regimes/icss_results.json` | `run_analysis.py` | ICSS variance breaks plus the GFC-validation block |
+| `results/regimes/icss_results.json` | `run_analysis.py` | ICSS variance breaks plus the GFC evidence block |
 | `results/figures/regime_visualisation.png` / `.pdf` | `visualise.py` | The methodology-chapter figure |
 
 ## Notes on volatility.py and the GFC boundary dates
 
-`volatility.py` implements the ICSS variance break test as a third instrument alongside Chow and Bai-Perron. The orchestrator writes its result to `results/regimes/icss_results.json` with a GFC-validation block that lists every detected variance break falling inside the GFC regime window and reports its distance, in quarters, from the current GFC start date.
+`volatility.py` implements the ICSS variance break test as a third instrument alongside Chow and Bai-Perron. The orchestrator writes its result to `results/regimes/icss_results.json` with a GFC evidence block that lists every detected variance break falling inside the GFC regime window and reports its distance, in quarters, from the current GFC start date.
 
 The test itself is a standard part of the methodology. The exact GFC and Post-GFC Recovery boundary dates are an open question under supervisor discussion (see the relevant entry in `report/decision-log.md`); the dates may or may not move in a future revision of `config/regimes.yaml`.
 

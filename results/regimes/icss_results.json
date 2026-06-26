@@ -23,24 +23,24 @@
       "d_statistic": 2.575707805275192
     }
   ],
-  "gfc_validation": {
-    "expected_boundary": "2008-01-01",
+  "gfc_evidence": {
+    "expected_boundary": "2008-04-01",
     "gfc_regime_window": [
-      "2008-01-01",
-      "2009-12-31"
+      "2008-04-01",
+      "2009-09-30"
     ],
     "breaks_inside_window": [
       {
         "date": "2008-06-30",
         "d_statistic": 2.993190360700638,
-        "quarters_from_2008_q1": 1
+        "quarters_from_gfc_start": 0
       },
       {
         "date": "2009-09-30",
         "d_statistic": 3.3190318088420376,
-        "quarters_from_2008_q1": 6
+        "quarters_from_gfc_start": 5
       }
     ],
-    "validated": true
+    "evidence_inside_window": true
   }
 }
