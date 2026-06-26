@@ -35,8 +35,7 @@ def _synthetic_data(
             "x2": rng.normal(size=n),
         }
     )
-    y_values = 1.0 + 0.5 * X["x1"] + 0.3 * \
-        X["x2"] + rng.normal(scale=0.1, size=n)
+    y_values = 1.0 + 0.5 * X["x1"] + 0.3 * X["x2"] + rng.normal(scale=0.1, size=n)
     y_values = y_values.copy()
     y_values.iloc[breakpoint_idx:] += shift
     return X, pd.Series(y_values, name="y"), pd.Series(dates, name="date")
@@ -131,8 +130,7 @@ def test_breakpoint_date_accepts_string_and_timestamp():
     """The breakpoint can be passed as a string or a pd.Timestamp."""
     X, y, dates = _synthetic_data(n=100)
     result_str = chow_test(X, y, dates, breakpoint_date="2012-07-01")
-    result_ts = chow_test(
-        X, y, dates, breakpoint_date=pd.Timestamp("2012-07-01"))
+    result_ts = chow_test(X, y, dates, breakpoint_date=pd.Timestamp("2012-07-01"))
     assert result_str.f_statistic == pytest.approx(result_ts.f_statistic)
     assert result_str.p_value == pytest.approx(result_ts.p_value)
 

@@ -52,8 +52,7 @@ def _real_regimes() -> list[dict]:
 
 def _quarter_end_dates(start: str = "2000-01-01", periods: int = 104) -> pd.Series:
     """Quarter-end date series mirroring the project dataset's basis."""
-    qe = pd.period_range(start=start, periods=periods,
-                         freq="Q").to_timestamp(how="end").normalize()
+    qe = pd.period_range(start=start, periods=periods, freq="Q").to_timestamp(how="end").normalize()
     return pd.Series(qe, name="date")
 
 
@@ -74,8 +73,7 @@ def test_assigns_104_rows_into_six_regimes_with_correct_counts():
 
 def test_regime_column_is_inserted_directly_after_date():
     """Output column order: date, regime, then everything else."""
-    df = pd.DataFrame({"date": _quarter_end_dates(periods=4),
-                      "x": [1, 2, 3, 4], "y": [5, 6, 7, 8]})
+    df = pd.DataFrame({"date": _quarter_end_dates(periods=4), "x": [1, 2, 3, 4], "y": [5, 6, 7, 8]})
     out = assign_regimes(df, regimes=_real_regimes())
     assert list(out.columns) == ["date", "regime", "x", "y"]
 
@@ -84,8 +82,7 @@ def test_boundary_quarter_routes_to_post_regime_for_gfc():
     """2007 Q4 stays Pre-GFC; 2008 Q1 jumps to GFC even with quarter-end input."""
     df = pd.DataFrame({"date": pd.to_datetime(["2007-12-31", "2008-03-31"])})
     out = assign_regimes(df, regimes=_real_regimes())
-    assert list(out["regime"]) == [
-        "Pre-GFC Stability", "Global Financial Crisis"]
+    assert list(out["regime"]) == ["Pre-GFC Stability", "Global Financial Crisis"]
 
 
 def test_all_four_remaining_boundaries():

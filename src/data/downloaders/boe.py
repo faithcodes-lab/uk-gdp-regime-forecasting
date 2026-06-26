@@ -66,8 +66,7 @@ def download_boe_series(series_name: str, *, save: bool = True) -> pd.DataFrame:
             code=code,
             raw_csv_path=out,
             transformations=["http_get", "parse_iadb_csv", "validate"],
-            parameters={"code": code,
-                        "frequency": series_cfg["frequency"], "url": url},
+            parameters={"code": code, "frequency": series_cfg["frequency"], "url": url},
         )
     return df
 

@@ -39,8 +39,7 @@ def _signal_with_breaks(
     segment_starts = [0] + list(true_break_indices)
     segment_ends = list(true_break_indices) + [n]
     for k, (start, end) in enumerate(zip(segment_starts, segment_ends)):
-        values[start:end] = segment_means[k] + \
-            rng.normal(scale=noise, size=end - start)
+        values[start:end] = segment_means[k] + rng.normal(scale=noise, size=end - start)
     return pd.Series(values, index=dates, name="signal")
 
 
@@ -58,8 +57,7 @@ def test_pelt_detects_no_break_in_stationary_signal():
 
 def test_pelt_detects_known_single_break():
     """A single mean shift should be detected near the true index."""
-    series = _signal_with_breaks(
-        true_break_indices=[50], segment_means=[0.0, 5.0], n=100)
+    series = _signal_with_breaks(true_break_indices=[50], segment_means=[0.0, 5.0], n=100)
     breaks = detect_breaks_pelt(series, penalty=10.0)
     assert len(breaks) >= 1
     detected_indices = [series.index.get_loc(b) for b in breaks]
@@ -142,8 +140,7 @@ def test_non_datetime_index_raises():
 
 def test_nan_values_dropped_before_detection():
     """NaN values are dropped; the remaining points are passed to the algorithm."""
-    series = _signal_with_breaks(
-        true_break_indices=[50], segment_means=[0.0, 5.0], n=100)
+    series = _signal_with_breaks(true_break_indices=[50], segment_means=[0.0, 5.0], n=100)
     series_with_nan = series.copy()
     series_with_nan.iloc[10] = np.nan
     series_with_nan.iloc[20] = np.nan

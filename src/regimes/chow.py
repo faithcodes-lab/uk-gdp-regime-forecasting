@@ -105,8 +105,7 @@ def chow_test(
             n_original,
         )
 
-    feature_cols = [
-        c for c in combined.columns if c not in ("__y__", "__date__")]
+    feature_cols = [c for c in combined.columns if c not in ("__y__", "__date__")]
     X_clean = combined[feature_cols]
     y_clean = combined["__y__"].rename(y.name)
     dates_clean = combined["__date__"]
@@ -135,15 +134,12 @@ def chow_test(
         )
 
     rss_pooled = float(sm.OLS(y_clean, X_with_const).fit().ssr)
-    rss_pre = float(
-        sm.OLS(y_clean[pre_mask], X_with_const[pre_mask]).fit().ssr)
-    rss_post = float(
-        sm.OLS(y_clean[post_mask], X_with_const[post_mask]).fit().ssr)
+    rss_pre = float(sm.OLS(y_clean[pre_mask], X_with_const[pre_mask]).fit().ssr)
+    rss_post = float(sm.OLS(y_clean[post_mask], X_with_const[post_mask]).fit().ssr)
 
     df_num = k_params
     df_den = n_total - 2 * k_params
-    f_statistic = ((rss_pooled - (rss_pre + rss_post)) /
-                   df_num) / ((rss_pre + rss_post) / df_den)
+    f_statistic = ((rss_pooled - (rss_pre + rss_post)) / df_num) / ((rss_pre + rss_post) / df_den)
     p_value = float(stats.f.sf(f_statistic, df_num, df_den))
 
     return ChowTestResult(

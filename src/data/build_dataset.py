@@ -72,11 +72,9 @@ def load_raw_from_disk() -> dict[str, dict[str, pd.DataFrame]]:
     for source, src_cfg in sources_cfg.items():
         out[source] = {}
         for series_name in src_cfg["series"]:
-            csv_path = _repo_root() / "data" / "raw" / \
-                source / f"{series_name}.csv"
+            csv_path = _repo_root() / "data" / "raw" / source / f"{series_name}.csv"
             if not csv_path.exists():
-                raise FileNotFoundError(
-                    f"Raw CSV missing: {csv_path}. Run `make download` first.")
+                raise FileNotFoundError(f"Raw CSV missing: {csv_path}. Run `make download` first.")
             df = pd.read_csv(csv_path, parse_dates=["date"])
             out[source][series_name] = df
     return out
@@ -154,11 +152,9 @@ def build(*, from_disk: bool = False) -> Path:
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(
-        description="UK GDP regime forecasting data pipeline.")
+    parser = argparse.ArgumentParser(description="UK GDP regime forecasting data pipeline.")
     mode = parser.add_mutually_exclusive_group()
-    mode.add_argument("--download-only", action="store_true",
-                      help="Download raw data only.")
+    mode.add_argument("--download-only", action="store_true", help="Download raw data only.")
     mode.add_argument(
         "--process-only",
         action="store_true",

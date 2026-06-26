@@ -9,7 +9,7 @@ Two algorithms are exposed:
 
 A third helper, :func:`tune_penalty`, runs PELT across a grid of penalty
 values and returns a single-table summary of the breakpoints detected at
-each value. 
+each value.
 
 Conventions:
 
@@ -56,8 +56,7 @@ def _prepare_signal(series: pd.Series) -> pd.Series:
         ValueError: If ``series.index`` is not a ``DatetimeIndex``.
     """
     if not isinstance(series.index, pd.DatetimeIndex):
-        raise ValueError(
-            "series must have a DatetimeIndex; got " f"{type(series.index).__name__}")
+        raise ValueError("series must have a DatetimeIndex; got " f"{type(series.index).__name__}")
     n_original = len(series)
     clean = series.dropna()
     n_dropped = n_original - len(clean)
@@ -176,8 +175,7 @@ def tune_penalty(
 
     rows = []
     for penalty in penalties:
-        breaks = detect_breaks_pelt(
-            series, penalty=float(penalty), model=model)
+        breaks = detect_breaks_pelt(series, penalty=float(penalty), model=model)
         rows.append(
             {
                 "penalty": float(penalty),
