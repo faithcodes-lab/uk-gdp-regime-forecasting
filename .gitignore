@@ -49,3 +49,6 @@ logs/*.log
 
 # R session history (stray when an R kernel opens a working file)
 .Rhistory
+
+# Personal viva working notes (private, never committed)
+viva/project-walkthrough.md
