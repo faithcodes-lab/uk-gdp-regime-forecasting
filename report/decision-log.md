@@ -296,3 +296,44 @@ Options considered:
   B. Amplitude-adjusted form (centred on 100), which would require a config and pipeline change to swap the FRED series codes.
 Decision: A, the percentage-balance form. A spot-check confirmed the stored series (business_confidence, consumer_confidence) are in percentage-balance form and match the FRED sources (BSCICP02GBM460S, CSCICP02GBM460S). No change needed before modelling.
 Rationale: the percentage-balance form carries the same underlying survey signal and is a recognised confidence proxy. It is internally consistent with the rest of the feature set, and the spot-check found no data fault. The amplitude-adjusted form was considered but not needed; switching would add pipeline work for no analytical gain.
+
+---
+
+## Decision: Sprint 3 preprocessing and modelling protocol (pre-implementation)
+Date: 27-06-2026
+Question: What preprocessing, cross-validation, and model-comparison rules govern Sprint 3 modelling, agreed before any model code exists?
+Options considered:
+  A. Defer the rules and let them emerge during implementation.
+
+  B. Record a single comprehensive protocol upfront, covering preprocessing discipline, per-model preprocessing, regime treatment, CV schemes, and model-comparison structure.
+
+  C. Spread the rules across separate decision entries as each becomes relevant during implementation.
+Decision: B. The eleven constraints below are adopted as the standing protocol for Sprint 3 modelling (04-modelling.md). They apply to ARIMA, Ridge, XGBoost, and LightGBM throughout the sprint and are not subject to change without a new decision-log entry.
+
+Framing: Sprint 3 evaluates whether nonlinear machine learning models provide additional predictive value over (a) a univariate statistical baseline (ARIMA) and (b) a linear multivariate baseline (Ridge), so that any performance gain can be attributed separately to feature richness (ARIMA versus Ridge) and to nonlinearity (Ridge versus the gradient-boosting models). The comparison is deliberately three-way, not a two-way machine-learning-versus-statistics split, to avoid confounding those two effects. Any reference to explanatory value means value in explaining model behaviour via SHAP, which is exploratory and not a causal claim about the drivers of GDP.
+
+Preprocessing:
+  1. Leakage discipline is the top rule. Any step that learns from the data (scaling above all) must be fit inside each cross-validation fold on the training portion only, never on the whole series first. Fit on data through quarter t, apply to predict t+1, then expand and refit. Use a pipeline so the scaler is bound to the fold automatically.
+
+  2. Scaling applies to Ridge only. Standardise (z-score) the features for Ridge. Do not scale for XGBoost or LightGBM; trees are scale-invariant. ARIMA ignores the feature matrix entirely.
+
+  3. ARIMA preprocessing is a stationarity check on the target only. Run ADF or KPSS on gdp_growth and decide the differencing order d. The target is already a growth rate so it may be stationary at d=0; confirm rather than assume, and reuse the EDA stationarity result if available.
+
+  4. ARIMA leakage discipline is separate from the feature pipeline. ARIMA forecasts from the target's own history, so at each one-step-ahead step refit ARIMA on gdp_growth through quarter t only, then predict t+1. Do not fit ARIMA once on the whole series.
+
+  5. One-step-ahead alignment. Features at quarter t must map to the target at t+1. Confirm the feature row and target row are shifted so nothing contemporaneous with the predicted quarter leaks into its own prediction. Lag features are fine; verify the shift.
+
+  6. The regime column is a grouping key for the regime-aligned CV folds, not a model input. It needs no encoding. Feeding regime in as a feature would be a separate logged decision, not a default.
+
+  7. No NLP-style preprocessing (no stop words, tokenising, stemming); the data is numeric tabular time series. No missing-value imputation; the dataset has zero NaNs by the engineer-before-trim design. No outlier removal; the COVID quarter is real signal.
+
+  8. random_state=42 everywhere a seed is needed.
+
+Cross-validation and evaluation:
+  9. Two CV schemes, kept distinct. Primary: expanding-window (walk-forward) one-step-ahead, the honest time-series scheme. Secondary: regime-aligned folds, so performance can be reported within each regime. They answer different questions and are both retained; do not collapse them into one.
+
+  10. Store every prediction tagged with its quarter AND its regime from the first model onward, so per-regime metrics can be computed later. Per-regime reporting cannot be added retrospectively if predictions were not tagged as they were generated.
+
+  11. The model comparison must be built to decompose two effects, per supervisor guidance: ARIMA versus Ridge isolates the value of adding features (univariate to multivariate, both linear); Ridge versus the gradient-boosting models (XGBoost, with LightGBM as a robustness check) isolates the value of non-linearity. Structure results so these two comparisons are visible, not just a four-way ranking by error.
+
+Rationale: A pre-implementation protocol prevents leakage and per-regime-tagging defects that are hard to retrofit, locks in supervisor-recommended discipline (one-step-ahead, expanding-window CV, regime-aligned CV as a secondary scheme, and the two-comparison decomposition), and gives Sprint 4 evaluation a known shape to consume. Each constraint is independently defensible at viva and the bundled form makes the protocol easy to cite later.
