@@ -1,7 +1,7 @@
 # Makefile for UK GDP Regime Forecasting
 # Run `make help` to see available targets.
 
-.PHONY: help install download process data eda regimes break-tests figure-regimes figure-cv-splits tune train all test lint format format-check clean
+.PHONY: help install download process data eda regimes break-tests figure-regimes figure-cv-splits tune train evaluate all test lint format format-check clean
 
 help:
 	@echo "Available targets:"
@@ -16,6 +16,7 @@ help:
 	@echo "  figure-cv-splits Render the two CV-scheme figures; writes results/figures/cv_splits_{expanding,regime_aligned}.{png,pdf}"
 	@echo "  tune          Force re-tuning of all models and train; writes results/tuning/ and results/models/"
 	@echo "  train         Train all four models using cached tuning where available; writes results/models/"
+	@echo "  evaluate      Run the Sprint 4 evaluation end-to-end; writes results/{predictions,metrics,tables,figures}/"
 	@echo "  all           Build dataset, run tests, run lint, check formatting"
 	@echo "  test          Run the pytest suite"
 	@echo "  lint          Run ruff linter"
@@ -55,6 +56,9 @@ tune:
 
 train:
 	python -m src.models.train_all
+
+evaluate:
+	PYTHONPATH=. python scripts/run_evaluation.py
 
 all: data test lint format-check
 

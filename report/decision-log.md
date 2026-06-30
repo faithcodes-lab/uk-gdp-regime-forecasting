@@ -434,3 +434,99 @@ Options considered:
 Decision: B. No early stopping. n_estimators is in the tuning grid (50, 100, 200, 500), so the search picks a sensible value. Final training uses the chosen n_estimators with no further stopping logic.
 
 Rationale: Early stopping requires a held-out validation set inside each CV fold, which adds complexity to the per-fold leakage discipline (rule 1 of decision-log entry 20) and makes the comparison with Ridge and ARIMA less clean. Explicit n_estimators tuning is simpler, more interpretable, and matches the conservative grid agreed in CP3. The cost of not using early stopping on a 104-quarter dataset is small because the conservative max_depth (2 to 4) already limits overfitting.
+
+---
+
+## Decision: Forecast accuracy metrics for the dissertation
+Date: 30-06-2026
+Question: Which forecast accuracy metrics should constitute the headline evaluation suite, and what should the MASE denominator be?
+Options considered:
+  A. RMSE only.
+
+  B. RMSE plus MAE plus R squared (no scale-invariant metric).
+
+  C. RMSE, MAE, MASE, R squared, with MASE scaled per-fold by the local y_train (MASE values not comparable across folds, schemes, or regimes).
+
+  D. RMSE, MAE, MASE, R squared, with MASE scaled by the full y series as a single common denominator.
+
+Decision: D. Four metrics with MASE on a common full-series denominator.
+
+Rationale: RMSE is the headline penalty (rule 5 of decision-log entry 20); MAE is the L1 companion. MASE adds the scale-invariant comparison against the no-skill naive baseline, which is what makes "below 1.0 beats the naive forecast" interpretable. R squared adds the explained-variance check. A common MASE denominator makes the value directly comparable across every row of the per-fold, per-regime, and aggregated tables; per-fold denominators would have produced six different MASE scales in the per-regime breakdown and broken the comparability.
+
+---
+
+## Decision: Diebold-Mariano significance test with HLN correction
+Date: 30-06-2026
+Question: How should pairwise model comparisons be tested for significance, and what corrections should be applied across the six-comparison family?
+Options considered:
+  A. Raw DM statistic with standard normal reference, no multiple-comparison correction.
+
+  B. DM with HLN small-sample correction, t-distribution reference with n-1 degrees of freedom, no multiple-comparison correction.
+
+  C. DM with HLN correction, t reference with n-1 df, Bonferroni correction across the six-comparison family with both raw and corrected p-values reported on the result.
+
+Decision: C. HLN-corrected DM with Bonferroni and both raw and corrected p-values surfaced.
+
+Rationale: The standard-normal reference is overconfident on the small (around 26 to 32 quarters) test sets the CV produces. Harvey, Leybourne and Newbold 1997 give the small-sample fix and recommend the t reference with n-1 df. With four models the comparison family has six pairwise tests, so Bonferroni is the conservative familywise-error control (rule 7 of decision-log entry 20). Reporting both raw and corrected p-values leaves the reader to judge how aggressive the correction should be; the dissertation will report the Bonferroni-corrected p-value as primary.
+
+---
+
+## Decision: Bootstrap confidence intervals for small-sample regimes
+Date: 30-06-2026
+Question: How should uncertainty be quantified for the GFC (n=6) and COVID (n=6) regimes where the standard asymptotic CIs are unsafe?
+Options considered:
+  A. Report no confidence intervals for small-sample regimes; let the point estimate stand alone.
+
+  B. Block bootstrap respecting the autocorrelation structure of forecast errors.
+
+  C. IID bootstrap with replacement (1000 iterations, 95 percent percentile CI, seed 42).
+
+Decision: C. IID bootstrap with the limitation made explicit in the dissertation.
+
+Rationale: Block bootstrap is the methodologically correct choice for autocorrelated errors but is infeasible at n=6: no usable block length exists between size 2 (too small to preserve correlation) and size 6 (no resampling possible). IID resampling is the only practical method. Acknowledged limitation: IID ignores any serial dependence in forecast errors and therefore understates uncertainty; the small-regime CIs are reported as indicative ranges, not precise intervals. The dissertation's limitations section names this trade-off directly so the reader can weigh it.
+
+---
+
+## Decision: Cross-validation aggregation across folds
+Date: 30-06-2026
+Question: How should per-fold metric values be aggregated into a single per-model, per-scheme summary?
+Options considered:
+  A. Pooled prediction-level metric across all folds (folds collapse into a single concatenated y_true and y_pred).
+
+  B. Mean across folds weighted by fold size.
+
+  C. Unweighted mean across folds with sample standard deviation (ddof=1) and median; NaN std on single-fold groups; per-fold observation counts preserved so the size-weighted view remains accessible to anyone who wants it.
+
+Decision: C. Unweighted across-fold aggregation.
+
+Rationale: Each fold is one independent train-test experiment; equal-fold weighting treats each experiment as one observation, which matches the experimental design. Size-weighting would privilege the late folds of the expanding-window scheme (they have the same test_size but the most surrounding context), conflating CV-fold structure with the metric value. Pooling folds discards the per-fold structure entirely and prevents the CV-variance figure (boxplot across folds) that demonstrates whether the cross-fold variation dominates the cross-model variation. Preserving n_observations on the per-fold DataFrame keeps the alternative open without changing the headline aggregation.
+
+---
+
+## Decision: Publication table and figure rendering
+Date: 30-06-2026
+Question: How should publication tables and figures for the dissertation be rendered, and which dependencies are acceptable?
+Options considered:
+  A. Pandas to_markdown plus pandas Styler.to_latex (requires both tabulate and jinja2 as runtime dependencies).
+
+  B. Hand-built markdown plus pandas Styler.to_latex (requires jinja2 only).
+
+  C. Hand-built markdown plus hand-built LaTeX with booktabs rules (no extra runtime dependency for table rendering).
+
+Decision: C. Hand-built markdown and hand-built LaTeX, dependency-free.
+
+Rationale: Originally scoped as option B; switched to C during CP6 implementation when Styler.to_latex raised AttributeError on missing jinja2. Hand-built LaTeX is around 25 lines, mirrors the hand-built markdown helper that the same principle already required, and keeps the rendering layer entirely dependency-free. Captions use hedged language ("appears to outperform", "results suggest"); definitive claims are reserved for comparisons where the Diebold-Mariano test supports them. Palette: viridis for the continuous heatmap, tab10 for the categorical bar and box plots; both are colour-blind accessible (Coblis pass deferred to dissertation-writing phase).
+
+---
+
+## Decision: Evaluation retrains per fold; persisted models reserved for SHAP
+Date: 30-06-2026
+Question: Should Sprint 4 evaluation reuse the joblib-persisted models from Sprint 3, or refit per fold inside the CV loop?
+Options considered:
+  A. Reuse the single fitted model from results/models/*.joblib for every CV fold (fast, but the model has already seen the held-out test data).
+
+  B. Per-fold retraining for sklearn models and refit-per-step for ARIMA inside CP2's prediction generation; the persisted joblibs are not used in evaluation at all and are reserved for the downstream SHAP analysis in Sprint 5.
+
+Decision: B. Per-fold retraining throughout; persisted joblibs reserved for Sprint 5 SHAP.
+
+Rationale: Reusing the full-fit model for every CV fold leaks future information into the predictions on every fold except the last, because the persisted model was fit on the full 104 quarters including each fold's test indices. CV correctness requires the model state for fold k to depend only on data prior to fold k's test indices (rule 1 of decision-log entry 20). The persisted joblibs remain valuable for Sprint 5: SHAP analysis operates on the full-fit model so the feature-attribution story uses every available quarter. Sprint 4 and Sprint 5 therefore use the same model definitions but different model instances, and that separation is by design rather than by accident.
