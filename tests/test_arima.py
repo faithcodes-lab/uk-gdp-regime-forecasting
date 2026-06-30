@@ -135,12 +135,30 @@ def test_arima_fallback_on_convergence_failure_is_logged(monkeypatch):
         assert used_order == good_order
         assert any(
             "powell" in m.lower() for m in captured
-        ), f"Expected lbfgs-to-powell warning in logs, got: {captured}"
+        ), f"Expected default-to-powell warning in logs, got: {captured}"
         assert any(
             "falling back" in m.lower() and "(1, 0, 0)" in m for m in captured
         ), f"Expected fallback-to-(1,0,0) warning in logs, got: {captured}"
     finally:
         loguru_logger.remove(sink_id)
+
+
+def test_arima_fit_actually_uses_requested_order_not_fallback():
+    """Fitting ARIMA(3, 0, 0) against real statsmodels uses (3, 0, 0), not the (1, 0, 0) fallback.
+
+    Guards against the API misuse where .fit(method="lbfgs") was treated as
+    an estimator name by statsmodels and always raised, so the fallback to
+    ARIMA(1, 0, 0) fired silently even on valid orders. This test runs
+    against real statsmodels (no mock) so the fallback only fires if the
+    real fit call genuinely fails.
+    """
+    y = _ar1_series(n=500, phi=0.7, noise=0.1, seed=42)
+    _fitted, used_order = arima_module._fit_with_fallback(y, order=(3, 0, 0))
+    assert used_order == (
+        3,
+        0,
+        0,
+    ), f"expected ARIMA(3, 0, 0) to fit on AR(1) data, got fallback {used_order}"
 
 
 def test_arima_predict_before_fit_raises():

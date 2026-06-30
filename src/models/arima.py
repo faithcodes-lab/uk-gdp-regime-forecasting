@@ -3,8 +3,9 @@
 Defaults to ARIMA(1, 0, 0), the published macroeconomic baseline. Passing
 order=None triggers a manual AIC grid search via select_arima_order, the
 in-house substitute for pmdarima.auto_arima (unavailable on Python 3.13).
-Convergence failures are caught and logged: lbfgs first, then powell as a
-retry, then ARIMA(1, 0, 0) as the final fallback. statsmodels ARIMA is
+Convergence failures are caught and logged: the default fit (lbfgs
+internally) first, then powell via method_kwargs on retry, then
+ARIMA(1, 0, 0) as the final fallback. statsmodels ARIMA is
 deterministic for a given series and order, so no random_state is wired
 in.
 """
@@ -57,18 +58,23 @@ def _fit_with_fallback(
     y: pd.Series | np.ndarray,
     order: tuple[int, int, int],
 ) -> tuple[Any, tuple[int, int, int]]:
-    """Fits ARIMA(y, order) with lbfgs, retries with powell, then falls back to ARIMA(1, 0, 0).
+    """Fits ARIMA(y, order) with the default optimiser, retries with powell, then falls back to ARIMA(1, 0, 0).
 
     Returns (fitted_results, used_order). Each substitution is logged via
     loguru so the audit trail survives in the log file.
     """
     try:
-        fitted = _StatsmodelsARIMA(y, order=order).fit(method="lbfgs")
+        # default optimiser is lbfgs internally; do not pass method= here
+        # because in statsmodels 0.14 method= selects the estimation
+        # technique, not the optimiser (the optimiser goes in method_kwargs)
+        fitted = _StatsmodelsARIMA(y, order=order).fit()
         return fitted, order
-    except Exception as exc_lbfgs:
-        logger.warning(f"ARIMA{order} failed with lbfgs ({exc_lbfgs}); retrying with powell")
+    except Exception as exc_default:
+        logger.warning(
+            f"ARIMA{order} failed with default fit ({exc_default}); retrying with powell"
+        )
         try:
-            fitted = _StatsmodelsARIMA(y, order=order).fit(method="powell")
+            fitted = _StatsmodelsARIMA(y, order=order).fit(method_kwargs={"method": "powell"})
             return fitted, order
         except Exception as exc_powell:
             logger.warning(
