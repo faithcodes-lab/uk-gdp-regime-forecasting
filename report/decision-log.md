@@ -354,3 +354,83 @@ Options considered:
 Decision: B. The 20-quarter floor is enforced by the MIN_TRAIN_SIZE constant in src/models/cv.py; expanding_window_splits raises if len(X) is less than n_splits * test_size + MIN_TRAIN_SIZE.
 
 Rationale: The first expanding-window fold needs enough history for the models to learn a meaningful relationship; 20 quarters (5 years of quarterly data) is a sensible floor that still leaves ample folds on the 104-quarter series. The full CV-scheme decision is deferred to CP7; this entry records only the floor.
+
+---
+
+## Decision: Cross-validation scheme
+Date: 30-06-2026
+Question: What CV scheme should Sprint 3 use for model performance estimation?
+Options considered:
+  A. Single expanding-window scheme.
+
+  B. Single regime-aligned scheme.
+
+  C. Both schemes, kept distinct, answering different questions (expanding-window primary, regime-aligned secondary).
+
+Decision: C. Expanding-window CV is the primary scheme, used for hyperparameter tuning and primary performance reporting. Regime-aligned CV is the secondary scheme, used to assess generalisation to novel regime types. They are kept distinct and never collapsed into one number, per rule 9 of decision-log entry 20.
+
+Rationale: Expanding-window is the standard time-series CV scheme and was supervisor-confirmed in Meeting 2. Regime-aligned is the methodological extension that directly tests how the model generalises to a regime it has not seen before, which is the question that motivates the SHAP regime-stability work in Sprint 4. The two schemes answer different questions and both are retained.
+
+---
+
+## Decision: Hyperparameter tuning approach
+Date: 30-06-2026
+Question: How should the three tunable models (Ridge, XGBoost, LightGBM) be tuned, given a 104-quarter dataset?
+Options considered:
+  A. Grid search over a small grid for each model.
+
+  B. RandomizedSearchCV on the first 75 percent of data, with cached best-params JSON so downstream runs do not re-tune.
+
+  C. Nested CV (inner CV for tuning, outer CV for performance estimation).
+
+  D. Bayesian optimisation (Optuna or hyperopt).
+
+Decision: B. RandomizedSearchCV on the first 75 percent of data (78 quarters), inner expanding-window CV with 5 folds, n_iter 20 for Ridge and 30 for XGBoost and LightGBM, random_state 42 throughout. Best-params results are cached to results/tuning/<model>_best_params.json so make train uses the cache by default and only retunes with --retune. ARIMA is tuned separately via select_arima_order (AIC grid search over p, d, q), not RandomizedSearchCV.
+
+Rationale: RandomizedSearchCV is the practical compromise between full grid search (slow) and nested CV (computationally infeasible on a small dataset). Reserving the final 25 percent (26 quarters) for evaluation means the search never sees the held-out data, eliminating tuning-time leakage into evaluation. Caching keeps Sprint 4 evaluation cheap and reproducible across runs.
+
+---
+
+## Decision: Models included (three-way comparison)
+Date: 30-06-2026
+Question: Which forecasting models should be compared in Sprint 3, and how should the comparison be structured to avoid the machine-learning-versus-statistics confound?
+Options considered:
+  A. Two models: ARIMA versus XGBoost (univariate versus multivariate, but conflates feature richness with non-linearity).
+
+  B. Three models: ARIMA, Ridge, XGBoost.
+
+  C. Four models: ARIMA, Ridge, XGBoost, LightGBM, structured as a three-way comparison.
+
+Decision: C. Four models, three-way comparison. ARIMA versus Ridge isolates the value of adding features (both linear, ARIMA univariate, Ridge multivariate). Ridge versus the gradient-boosting models (XGBoost and LightGBM) isolates the value of non-linearity (all multivariate, linear versus tree-based). LightGBM is the robustness check on the gradient-boosting result. Any performance gain can then be attributed separately to feature richness and to non-linearity rather than lumped together.
+
+Rationale: The supervisor required this fairness framing because comparing ARIMA against XGBoost alone conflates two effects: adding features (univariate to multivariate) and adding non-linearity (linear to tree-based). Without the decomposition, a claim that XGBoost beats ARIMA would be ambiguous about whether the gain comes from features or from non-linearity. The three-way structure forces the distinction. This framing must carry into the writeup and the viva.
+
+---
+
+## Decision: Regime column treatment
+Date: 30-06-2026
+Question: Should the regime label be a model feature, a grouping key for the CV folds, or both?
+Options considered:
+  A. Regime as a model feature (one-hot encoded or treated as categorical).
+
+  B. Regime as a grouping key only, used by regime_aligned_splits and for per-regime evaluation reporting; never passed to the models as a feature.
+
+  C. Both: regime is a feature and a grouping key.
+
+Decision: B. Regime is a grouping key only, not a model input. The regime column is dropped from the feature matrix before any model.fit call in train_all.py.
+
+Rationale: Including regime as a feature would let the model trivially condition predictions on regime membership, which compromises the analysis of how feature importance shifts across regimes in Sprint 4. If a model can branch directly on regime, then the SHAP feature-importance ranks for the other features become harder to interpret as regime-specific signal. Holding regime out of the feature set keeps the per-regime SHAP comparison clean.
+
+---
+
+## Decision: Early stopping for gradient boosting
+Date: 30-06-2026
+Question: Should XGBoost and LightGBM use early stopping during training?
+Options considered:
+  A. Early stopping with a held-out validation split inside each CV fold.
+
+  B. No early stopping; tune n_estimators explicitly via RandomizedSearchCV.
+
+Decision: B. No early stopping. n_estimators is in the tuning grid (50, 100, 200, 500), so the search picks a sensible value. Final training uses the chosen n_estimators with no further stopping logic.
+
+Rationale: Early stopping requires a held-out validation set inside each CV fold, which adds complexity to the per-fold leakage discipline (rule 1 of decision-log entry 20) and makes the comparison with Ridge and ARIMA less clean. Explicit n_estimators tuning is simpler, more interpretable, and matches the conservative grid agreed in CP3. The cost of not using early stopping on a 104-quarter dataset is small because the conservative max_depth (2 to 4) already limits overfitting.

@@ -262,3 +262,36 @@ def test_cross_validate_arima_works_with_expanding_window_splits():
     preds = cross_validate_arima(y, splits, order=(1, 0, 0))
     assert preds.shape == (32,)
     assert np.all(np.isfinite(preds))
+
+
+def test_visualise_cv_main_writes_both_figures(tmp_path, monkeypatch):
+    """main() writes PNG and PDF for both CV schemes against a synthetic dataset."""
+    from src.models import visualise_cv as vis_module
+
+    n = 60
+    df = pd.DataFrame(
+        {
+            "date": pd.period_range("2010-01-01", periods=n, freq="Q")
+            .to_timestamp(how="end")
+            .normalize(),
+            "gdp_growth": np.arange(n, dtype=float),
+            "regime": (["A"] * 10)
+            + (["B"] * 10)
+            + (["C"] * 10)
+            + (["D"] * 10)
+            + (["E"] * 10)
+            + (["F"] * 10),
+            "f1": np.arange(n, dtype=float),
+        }
+    )
+    data_path = tmp_path / "data.parquet"
+    df.to_parquet(data_path)
+
+    monkeypatch.setattr(vis_module, "_DATA_PATH", data_path)
+    monkeypatch.setattr(vis_module, "_FIGURES_DIR", tmp_path / "figures")
+
+    vis_module.main()
+
+    for stem in ["cv_splits_expanding", "cv_splits_regime_aligned"]:
+        for ext in ["png", "pdf"]:
+            assert (tmp_path / "figures" / f"{stem}.{ext}").exists(), f"missing {stem}.{ext}"

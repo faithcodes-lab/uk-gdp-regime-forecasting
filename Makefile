@@ -1,7 +1,7 @@
 # Makefile for UK GDP Regime Forecasting
 # Run `make help` to see available targets.
 
-.PHONY: help install download process data eda regimes break-tests figure-regimes tune train all test lint format format-check clean
+.PHONY: help install download process data eda regimes break-tests figure-regimes figure-cv-splits tune train all test lint format format-check clean
 
 help:
 	@echo "Available targets:"
@@ -13,6 +13,7 @@ help:
 	@echo "  regimes       Add regime column to final dataset (run after 'make data'); writes data/processed/final_dataset.parquet"
 	@echo "  break-tests   Run Chow tests + Bai-Perron sweep on gdp_growth; writes results/regimes/"
 	@echo "  figure-regimes Render publication-quality regime figure; writes results/figures/regime_visualisation.{png,pdf}"
+	@echo "  figure-cv-splits Render the two CV-scheme figures; writes results/figures/cv_splits_{expanding,regime_aligned}.{png,pdf}"
 	@echo "  tune          Force re-tuning of all models and train; writes results/tuning/ and results/models/"
 	@echo "  train         Train all four models using cached tuning where available; writes results/models/"
 	@echo "  all           Build dataset, run tests, run lint, check formatting"
@@ -45,6 +46,9 @@ break-tests:
 
 figure-regimes:
 	PYTHONPATH=. python -m src.regimes.visualise
+
+figure-cv-splits:
+	python -m src.models.visualise_cv
 
 tune:
 	python -m src.models.train_all --retune

@@ -1,15 +1,21 @@
 """Draws Gantt-style charts of the cross-validation folds.
 
 Used by the methodology figure: one chart per CV scheme showing which
-rows are train and which are test in each fold. Returns the
-figure.
+rows are train and which are test in each fold. Run via
+`python -m src.models.visualise_cv` (or `make figure-cv-splits`) to
+write both schemes as PNG and PDF under results/figures/.
 """
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from matplotlib.figure import Figure
+
+from src.models.cv import expanding_window_splits, regime_aligned_splits
 
 
 def plot_cv_splits(
@@ -79,3 +85,33 @@ def plot_cv_splits(
     ax.grid(True, axis="x", alpha=0.3)
     fig.tight_layout()
     return fig
+
+
+_DATA_PATH = Path("data/processed/final_dataset.parquet")
+_FIGURES_DIR = Path("results/figures")
+
+
+def _save(fig: Figure, stem: str) -> None:
+    """Writes the figure to results/figures/<stem>.png (300 dpi) and <stem>.pdf."""
+    _FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+    fig.savefig(_FIGURES_DIR / f"{stem}.png", dpi=300, bbox_inches="tight")
+    fig.savefig(_FIGURES_DIR / f"{stem}.pdf", bbox_inches="tight")
+
+
+def main() -> None:
+    """Loads the processed dataset, builds both CV splits, and writes both methodology figures."""
+    df = pd.read_parquet(_DATA_PATH).dropna().reset_index(drop=True)
+
+    expanding = expanding_window_splits(df, n_splits=8, test_size=4)
+    fig1 = plot_cv_splits(expanding, n_samples=len(df), title="Expanding-window CV")
+    _save(fig1, "cv_splits_expanding")
+    plt.close(fig1)
+
+    regime_aligned = regime_aligned_splits(df, regime_column="regime")
+    fig2 = plot_cv_splits(regime_aligned, n_samples=len(df), title="Regime-aligned CV")
+    _save(fig2, "cv_splits_regime_aligned")
+    plt.close(fig2)
+
+
+if __name__ == "__main__":
+    main()
