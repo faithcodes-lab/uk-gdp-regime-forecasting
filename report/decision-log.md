@@ -308,9 +308,12 @@ Options considered:
   B. Record a single comprehensive protocol upfront, covering preprocessing discipline, per-model preprocessing, regime treatment, CV schemes, and model-comparison structure.
 
   C. Spread the rules across separate decision entries as each becomes relevant during implementation.
+
 Decision: B. The eleven constraints below are adopted as the standing protocol for Sprint 3 modelling (04-modelling.md). They apply to ARIMA, Ridge, XGBoost, and LightGBM throughout the sprint and are not subject to change without a new decision-log entry.
 
-Framing: Sprint 3 evaluates whether nonlinear machine learning models provide additional predictive value over (a) a univariate statistical baseline (ARIMA) and (b) a linear multivariate baseline (Ridge), so that any performance gain can be attributed separately to feature richness (ARIMA versus Ridge) and to nonlinearity (Ridge versus the gradient-boosting models). The comparison is deliberately three-way, not a two-way machine-learning-versus-statistics split, to avoid confounding those two effects. Any reference to explanatory value means value in explaining model behaviour via SHAP, which is exploratory and not a causal claim about the drivers of GDP.
+Framing: Sprint 3 evaluates whether nonlinear machine learning models provide additional predictive value over
+ (a) a univariate statistical baseline (ARIMA) and
+  (b) a linear multivariate baseline (Ridge), so that any performance gain can be attributed separately to feature richness (ARIMA versus Ridge) and to nonlinearity (Ridge versus the gradient-boosting models). The comparison is deliberately three-way, not a two-way machine-learning-versus-statistics split, to avoid confounding those two effects. Any reference to explanatory value means value in explaining model behaviour via SHAP, which is exploratory and not a causal claim about the drivers of GDP.
 
 Preprocessing:
   1. Leakage discipline is the top rule. Any step that learns from the data (scaling above all) must be fit inside each cross-validation fold on the training portion only, never on the whole series first. Fit on data through quarter t, apply to predict t+1, then expand and refit. Use a pipeline so the scaler is bound to the fold automatically.
@@ -337,3 +340,17 @@ Cross-validation and evaluation:
   11. The model comparison must be built to decompose two effects, per supervisor guidance: ARIMA versus Ridge isolates the value of adding features (univariate to multivariate, both linear); Ridge versus the gradient-boosting models (XGBoost, with LightGBM as a robustness check) isolates the value of non-linearity. Structure results so these two comparisons are visible, not just a four-way ranking by error.
 
 Rationale: A pre-implementation protocol prevents leakage and per-regime-tagging defects that are hard to retrofit, locks in supervisor-recommended discipline (one-step-ahead, expanding-window CV, regime-aligned CV as a secondary scheme, and the two-comparison decomposition), and gives Sprint 4 evaluation a known shape to consume. Each constraint is independently defensible at viva and the bundled form makes the protocol easy to cite later.
+
+---
+
+## Decision: Minimum training size for the first expanding-window CV fold
+Date: 30-06-2026
+Question: What minimum training size should the expanding-window CV require for the first fold?
+Options considered:
+  A. No floor; the first training set is whatever the data size and the number of folds happen to leave over.
+
+  B. A fixed minimum of 20 quarters (5 years), enforced in code.
+
+Decision: B. The 20-quarter floor is enforced by the MIN_TRAIN_SIZE constant in src/models/cv.py; expanding_window_splits raises if len(X) is less than n_splits * test_size + MIN_TRAIN_SIZE.
+
+Rationale: The first expanding-window fold needs enough history for the models to learn a meaningful relationship; 20 quarters (5 years of quarterly data) is a sensible floor that still leaves ample folds on the 104-quarter series. The full CV-scheme decision is deferred to CP7; this entry records only the floor.
