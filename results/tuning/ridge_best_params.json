@@ -1,0 +1,12 @@
+{
+  "model": "ridge",
+  "best_params": {
+    "ridge__alpha": 100.0
+  },
+  "best_score": -0.23021290148161624,
+  "scoring": "neg_root_mean_squared_error",
+  "n_iter": 20,
+  "n_splits": 5,
+  "random_state": 42,
+  "timestamp": "2026-06-30T16:56:45.209684+00:00"
+}

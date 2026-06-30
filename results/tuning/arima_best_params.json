@@ -1,0 +1,22 @@
+{
+  "model": "arima",
+  "best_params": {
+    "order": [
+      3,
+      0,
+      0
+    ],
+    "seasonal_order": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "best_score": null,
+  "scoring": "aic",
+  "n_iter": null,
+  "n_splits": null,
+  "random_state": 42,
+  "timestamp": "2026-06-30T16:56:52.390003+00:00"
+}

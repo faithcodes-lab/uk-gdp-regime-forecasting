@@ -1,0 +1,15 @@
+{
+  "model": "lightgbm",
+  "best_params": {
+    "lightgbm__n_estimators": 100,
+    "lightgbm__min_child_samples": 10,
+    "lightgbm__max_depth": 2,
+    "lightgbm__learning_rate": 0.01
+  },
+  "best_score": -0.22894779807641102,
+  "scoring": "neg_root_mean_squared_error",
+  "n_iter": 30,
+  "n_splits": 5,
+  "random_state": 42,
+  "timestamp": "2026-06-30T16:56:50.917106+00:00"
+}
