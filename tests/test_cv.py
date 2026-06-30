@@ -17,7 +17,11 @@ import matplotlib
 matplotlib.use("Agg")  # headless backend for tests
 
 
-from src.models.cv import expanding_window_splits, regime_aligned_splits  # noqa: E402
+from src.models.cv import (  # noqa: E402
+    cross_validate_arima,
+    expanding_window_splits,
+    regime_aligned_splits,
+)
 
 # helpers
 
@@ -141,8 +145,7 @@ def test_expanding_window_expanding_train_size():
     sizes = [len(train_idx) for train_idx, _ in splits]
     # consecutive differences should all equal test_size
     diffs = [sizes[i + 1] - sizes[i] for i in range(len(sizes) - 1)]
-    assert all(
-        d == 4 for d in diffs), f"train sizes not monotonically +4: {sizes}"
+    assert all(d == 4 for d in diffs), f"train sizes not monotonically +4: {sizes}"
 
 
 # regime aligned structural tests
@@ -208,3 +211,54 @@ def test_plot_cv_splits_returns_figure():
     fig = plot_cv_splits(splits, n_samples=len(X), title="Test")
     assert isinstance(fig, matplotlib.figure.Figure)
     plt.close(fig)
+
+
+def _ar1_series_for_cv(
+    n: int = 104, phi: float = 0.7, noise: float = 0.1, seed: int = 42
+) -> pd.Series:
+    """Generates a synthetic AR(1) series for the ARIMA cross-validation tests."""
+    rng = np.random.default_rng(seed)
+    y = np.zeros(n)
+    for t in range(1, n):
+        y[t] = phi * y[t - 1] + rng.normal(scale=noise)
+    return pd.Series(y)
+
+
+def test_cross_validate_arima_returns_one_prediction_per_test_index():
+    """cross_validate_arima returns one prediction per test row across all folds."""
+    y = _ar1_series_for_cv(n=104)
+    X = pd.DataFrame({"f": np.arange(104, dtype=float)})
+    splits = expanding_window_splits(X, n_splits=8, test_size=4)
+    preds = cross_validate_arima(y, splits, order=(1, 0, 0))
+    expected = sum(len(test_idx) for _, test_idx in splits)
+    assert preds.shape == (expected,)
+
+
+def test_cross_validate_arima_uses_only_past_for_each_prediction():
+    """Predictions are unchanged when y values past the last test position are removed.
+
+    The refit-per-step loop must only use y[0:i] at each test step i.
+    Truncating y past the last test position must therefore leave every
+    prediction identical; any leakage of future values would break this.
+    """
+    y_full = _ar1_series_for_cv(n=120)
+    X = pd.DataFrame({"f": np.arange(104, dtype=float)})
+    splits = expanding_window_splits(X, n_splits=8, test_size=4)
+
+    last_test = max(int(np.max(test_idx)) for _, test_idx in splits)
+
+    full_preds = cross_validate_arima(y_full, splits, order=(1, 0, 0))
+    y_truncated = y_full.iloc[: last_test + 1]
+    truncated_preds = cross_validate_arima(y_truncated, splits, order=(1, 0, 0))
+
+    np.testing.assert_array_equal(full_preds, truncated_preds)
+
+
+def test_cross_validate_arima_works_with_expanding_window_splits():
+    """cross_validate_arima runs cleanly across all 8 folds and returns finite predictions."""
+    y = _ar1_series_for_cv(n=104)
+    X = pd.DataFrame({"f": np.arange(104, dtype=float)})
+    splits = expanding_window_splits(X, n_splits=8, test_size=4)
+    preds = cross_validate_arima(y, splits, order=(1, 0, 0))
+    assert preds.shape == (32,)
+    assert np.all(np.isfinite(preds))

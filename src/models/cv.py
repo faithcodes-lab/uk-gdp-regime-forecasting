@@ -158,3 +158,38 @@ def regime_aligned_splits(
         test_idx = np.where(np.isin(regime_values, test_regimes_list))[0]
         splits.append((train_idx, test_idx))
     return splits
+
+
+def cross_validate_arima(
+    y: pd.Series | np.ndarray,
+    splits: list[tuple[np.ndarray, np.ndarray]],
+    order: tuple[int, int, int] | None = None,
+) -> np.ndarray:
+    """Runs one-step-ahead-with-refit CV for ARIMA.
+
+    For each fold and each test position i, refits ARIMA on y[0:i] and
+    predicts y[i]. Returns one prediction per test row, concatenated
+    across folds in fold order. When order is None, picks one order from
+    the first fold's training slice via select_arima_order.
+    """
+    # lazy import so cv.py users who only need the splitters do not pay
+    # the statsmodels import cost
+    from src.models.arima import ARIMAModel, select_arima_order
+
+    y_series = pd.Series(np.asarray(y))
+
+    if order is None:
+        # Pick the order once from the first fold's training slice; doing this
+        # per step would be too slow and order is a structural choice, not a
+        # per-step decision.
+        first_train_end = int(np.max(splits[0][0])) + 1
+        order = select_arima_order(y_series.iloc[:first_train_end])
+
+    model = ARIMAModel(order=order)
+    predictions: list[float] = []
+    for _train_idx, test_idx in splits:
+        for i in test_idx:
+            i_int = int(i)
+            history = y_series.iloc[:i_int]
+            predictions.append(model.predict_one_step_ahead(history))
+    return np.asarray(predictions)
