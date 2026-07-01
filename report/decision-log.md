@@ -530,3 +530,17 @@ Options considered:
 Decision: B. Per-fold retraining throughout; persisted joblibs reserved for Sprint 5 SHAP.
 
 Rationale: Reusing the full-fit model for every CV fold leaks future information into the predictions on every fold except the last, because the persisted model was fit on the full 104 quarters including each fold's test indices. CV correctness requires the model state for fold k to depend only on data prior to fold k's test indices (rule 1 of decision-log entry 20). The persisted joblibs remain valuable for Sprint 5: SHAP analysis operates on the full-fit model so the feature-attribution story uses every available quarter. Sprint 4 and Sprint 5 therefore use the same model definitions but different model instances, and that separation is by design rather than by accident.
+
+---
+
+## Decision: Per-regime table interpretation caveats
+Date: 01-07-2026
+Question: How should the per-regime results be read, given the two structural properties of the CV schemes that the aggregation diagnosis surfaced (ARIMA numbers identical across schemes; n and regime coverage differing across schemes)?
+Options considered:
+  A. Present the per-regime numbers at face value and leave interpretation to the reader.
+
+  B. Record three interpretation caveats bound to the per-regime tables so any reader, reviewer, or future author applies them consistently: n counts prediction instances not unique quarters under regime-aligned; sklearn regime-aligned per-regime metrics pool across multiple training snapshots; expanding-window never tests Global Financial Crisis or Post-GFC Recovery.
+
+Decision: B. Record the three caveats as a durable interpretation layer over the per-regime tables.
+
+Rationale: The post-hoc diagnosis of per-regime aggregation established the three caveats and they must bind how per-regime results are written up. First, under regime-aligned CV the fold structure tests each late regime once per fold from its first appearance forward, so n on that table counts prediction instances rather than unique quarters. For example, the COVID row shows n=24 in regime-aligned but the underlying data is 6 unique quarters tested in 4 folds; effective sample size for any bootstrap CI on such a subset is the unique-quarter count, not n, and CI width should be interpreted accordingly. Second, sklearn models produce a different prediction per fold because each fold trains on a different set of prior regimes, so the sklearn regime-aligned per-regime metric is a pooled error across several training snapshots rather than a single clean error for a single trained model; the number represents average error across training states. Third, the expanding-window scheme's training portion covers the entire pre-Brexit era, so Global Financial Crisis and Post-GFC Recovery never enter its test folds; their absence from the expanding-window per-regime table means "not tested," not "forecast well," and only the regime-aligned scheme can speak to those two regimes at all. These caveats do not change the code; they are the reading protocol the dissertation and any downstream analysis must apply.

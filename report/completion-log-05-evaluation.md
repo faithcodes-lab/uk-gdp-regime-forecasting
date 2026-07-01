@@ -60,6 +60,8 @@ The COVID-19 Shock regime (n=6) inflates the per-regime RMSE substantially: ARIM
 
 Per-module Sprint 4 coverage: metrics.py 100 percent, predictions.py 98 percent, diebold_mariano.py 94 percent, regime_evaluation.py 90 percent, aggregation.py 93 percent, orchestrator.py 86 percent, src/reporting/tables.py 100 percent, src/reporting/figures.py 98 percent.
 
+Post-hoc diagnosis of the per-regime aggregation confirmed correct behaviour, not a bug. ARIMA's per-regime numbers are identical to the decimal across the two CV schemes because ARIMA refits per step on each quarter's own history and ignores the training set, so mean-based metrics computed on six unique COVID predictions and on the same six predictions duplicated four times (as happens under regime-aligned) are algebraically equal. The differing n values and regime coverage across schemes (COVID n=6 expanding-window against n=24 regime-aligned; Global Financial Crisis and Post-GFC Recovery absent from the expanding-window table entirely) reflect the two schemes' different test structures: expanding-window tests each late quarter once, regime-aligned tests each late regime once per fold from its first appearance forward, and expanding-window's training portion covers the pre-Brexit era so those earlier regimes never enter its test folds. The three interpretation caveats this diagnosis implies are recorded as a new decision-log entry.
+
 ## Decisions added to report/decision-log.md
 
 Sprint 4 added six entries (27 through 32). On the Sprint 4 branch the decision log now holds 32 entries total.
