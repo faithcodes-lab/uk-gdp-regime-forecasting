@@ -74,13 +74,13 @@ data_sources:
     series:
       bank_rate:
         code: IUDBEDR                    # Bank of England Bank Rate, end of period
-        url: "https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes&SeriesCodes=IUDBEDR&UsingCodes=Y&CSVF=TN&Datefrom=01/Jan/2000&Dateto=31/Dec/2025"  
+        url: "https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes&SeriesCodes=IUDBEDR&UsingCodes=Y&CSVF=TN&Datefrom=01/Jan/2000&Dateto=31/Dec/2026"
         frequency: monthly
         aggregation: end_of_period
         description: Bank of England Bank Rate
       gbp_usd_rate:
         code: XUDLUSS                    #  Spot exchange rate, US$ into £, end of period
-        url: "https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes&SeriesCodes=XUDLUSS&UsingCodes=Y&CSVF=TN&Datefrom=01/Jan/2000&Dateto=31/Dec/2025"  
+        url: "https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes&SeriesCodes=XUDLUSS&UsingCodes=Y&CSVF=TN&Datefrom=01/Jan/2000&Dateto=31/Dec/2026"
         frequency: monthly
         aggregation: end_of_period
         description: GBP/USD spot exchange rate
