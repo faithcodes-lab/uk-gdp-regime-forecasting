@@ -10,8 +10,13 @@ from __future__ import annotations
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 from src.run_shap_analysis import run_shap_analysis
+
+# Every test here runs the full pipeline on the real frozen dataset, which is
+# gitignored and absent in CI, so the whole module is integration-only.
+pytestmark = pytest.mark.integration
 
 _EXPECTED_CSVS = [
     "global_importance.csv",

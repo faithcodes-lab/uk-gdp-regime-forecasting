@@ -119,6 +119,7 @@ def test_load_best_model_raises_when_no_gradient_boosting_rows(tmp_path):
         load_best_model(metrics_path=metrics_path)
 
 
+@pytest.mark.integration
 def test_load_global_X_matches_the_frozen_training_matrix():
     X = load_global_X()
 

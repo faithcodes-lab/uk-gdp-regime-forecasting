@@ -75,6 +75,7 @@ def test_small_sample_flagging(small_model_and_data):
     assert metadata["recovery"]["small_sample"] is False
 
 
+@pytest.mark.integration
 def test_per_regime_shap_on_real_model_and_real_regimes():
     """Integration check against the real xgboost.joblib and the real regime column."""
     model, _ = load_best_model()
