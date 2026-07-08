@@ -87,3 +87,7 @@ class XGBForecastingModel(ForecastingModel):
             "n_estimators": self.n_estimators,
             "random_state": self.random_state,
         }
+
+    def get_estimator(self) -> XGBRegressor:
+        """Returns the fitted XGBRegressor, for SHAP and other estimator-level access."""
+        return self._pipeline.named_steps["xgboost"]

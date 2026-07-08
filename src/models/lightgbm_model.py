@@ -99,3 +99,7 @@ class LGBMForecastingModel(ForecastingModel):
             "min_child_samples": self.min_child_samples,
             "random_state": self.random_state,
         }
+
+    def get_estimator(self) -> LGBMRegressor:
+        """Returns the fitted LGBMRegressor, for SHAP and other estimator-level access."""
+        return self._pipeline.named_steps["lightgbm"]
