@@ -36,7 +36,7 @@ jobs:
       - name: Run tests
         run: |
           set +e
-          pytest -v
+          pytest -v -m "not integration"
           code=$?
           if [ "$code" -eq 5 ]; then
             echo "No tests collected (empty scaffold); treating as success."

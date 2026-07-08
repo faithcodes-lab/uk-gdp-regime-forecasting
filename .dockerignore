@@ -1,0 +1,53 @@
+# VCS / venv / caches
+.git/
+.gitignore
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Secrets and host-only configuration (provided via env_file at runtime)
+.env
+.env.example
+
+# Runtime data (mounted as volumes at runtime; never bake into the image)
+data/raw/*
+data/interim/*
+data/processed/*
+data/lineage/*
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/lineage/.gitkeep
+
+# Sprint 1 user-needs (not used by the pipeline)
+data/user-needs/
+
+# Logs (regenerated per run)
+logs/*.log
+!logs/.gitkeep
+
+# Project artefacts unrelated to the pipeline run
+prompts/
+report/
+paper/
+issue-templates/
+bootstrap/
+docs/
+notebooks/
+viva/
+results/
+gtv-application/

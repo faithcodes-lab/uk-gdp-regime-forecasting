@@ -1,0 +1,15 @@
+\begin{table}
+\caption{Diebold-Mariano pairwise comparisons (regime-aligned CV). Harvey-Leybourne-Newbold small-sample correction applied; reference t-distribution with n minus 1 degrees of freedom. Bonferroni correction applied across the six-comparison family. Where the Bonferroni-corrected p-value is below 0.05, the test indicates a significant difference in forecast accuracy.}
+\begin{tabular}{lrrrrr}
+\toprule
+Model A & Model B & n & Statistic & p-value & p-value (Bonferroni) \\
+\midrule
+arima & ridge & 216 & 2.200 & 0.029 & 0.173 \\
+arima & xgboost & 216 & 2.207 & 0.028 & 0.170 \\
+arima & lightgbm & 216 & 2.205 & 0.028 & 0.171 \\
+ridge & xgboost & 216 & 2.155 & 0.032 & 0.194 \\
+ridge & lightgbm & 216 & 2.090 & 0.038 & 0.227 \\
+xgboost & lightgbm & 216 & 0.298 & 0.766 & 1.000 \\
+\bottomrule
+\end{tabular}
+\end{table}

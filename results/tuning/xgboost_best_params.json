@@ -1,0 +1,14 @@
+{
+  "model": "xgboost",
+  "best_params": {
+    "xgboost__n_estimators": 50,
+    "xgboost__max_depth": 4,
+    "xgboost__learning_rate": 0.01
+  },
+  "best_score": -0.23096075252750392,
+  "scoring": "neg_root_mean_squared_error",
+  "n_iter": 30,
+  "n_splits": 5,
+  "random_state": 42,
+  "timestamp": "2026-06-30T16:56:49.364410+00:00"
+}

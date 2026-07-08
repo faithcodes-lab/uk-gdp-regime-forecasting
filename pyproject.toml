@@ -38,6 +38,8 @@ dependencies = [
     "python-dotenv>=1.0",
     "pyyaml>=6.0",
     "requests>=2.31",
+    "openpyxl>=3.1",
+    "pyarrow>=14.0",
 ]
 
 [project.optional-dependencies]
@@ -67,3 +69,6 @@ target-version = ["py311"]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "-v --cov=src --cov-report=term-missing"
+markers = [
+    "integration: tests that hit real external services; manual run only",
+]

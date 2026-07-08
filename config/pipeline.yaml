@@ -1,0 +1,127 @@
+# Pipeline configuration for UK GDP regime forecasting.
+
+
+
+project:
+  name: uk-gdp-regime-forecasting
+  random_state: 42
+  date_range:
+    start: 2000-01-01
+    end: 2025-12-31
+
+paths:
+  raw: data/raw
+  interim: data/interim
+  processed: data/processed
+  schemas: data/schemas
+  lineage: data/lineage
+  api_cache: data/raw/_api_responses
+  final_dataset: data/processed/final_dataset.parquet
+
+data_sources:
+
+  ons:
+    # ONS retired the api.ons.gov.uk API in Nov 2024. Data now comes from the
+    # ONS website timeseries JSON, built as:
+    #   <api_base>/<path>/timeseries/<cdid>/<dataset>/data
+    api_base: https://www.ons.gov.uk
+    series:
+      gdp_growth:
+        cdid: IHYQ
+        path: economy/grossdomesticproductgdp
+        dataset: qna
+        frequency: quarterly
+        aggregation: identity
+        description: UK GDP quarter-on-quarter growth rate (target variable)
+      unemployment_rate:
+        cdid: MGSX
+        path: employmentandlabourmarket/peoplenotinwork/unemployment
+        dataset: lms
+        frequency: monthly
+        aggregation: quarterly_mean
+        description: UK unemployment rate (Labour Force Survey, aged 16+)
+      cpi_inflation:
+        cdid: D7G7
+        path: economy/inflationandpriceindices
+        dataset: mm23
+        frequency: monthly
+        aggregation: quarterly_mean
+        description: UK CPI 12-month inflation rate
+      trade_balance:
+        cdid: IKBJ
+        path: economy/nationalaccounts/balanceofpayments
+        dataset: mret
+        frequency: monthly
+        aggregation: quarterly_mean
+        description: UK total trade balance (goods and services)
+      gfcf_growth:
+        cdid: NPQT                       # ONS publishes NPQT as a CVM SA £m level; QoQ growth is computed in the pipeline
+        path: economy/grossdomesticproductgdp
+        dataset: qna
+        frequency: quarterly
+        aggregation: qoq_pct_change
+        description: Gross fixed capital formation, quarterly growth (derived QoQ % change from NPQT level)
+      govt_consumption_growth:
+        cdid: NMRY                       # ONS publishes NMRY as a CVM SA £m level; QoQ growth is computed in the pipeline
+        path: economy/grossdomesticproductgdp
+        dataset: qna
+        frequency: quarterly
+        aggregation: qoq_pct_change
+        description: General government final consumption expenditure, quarterly growth (derived QoQ % change from NMRY level)
+
+  boe:
+    iadb_base: https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp
+    series:
+      bank_rate:
+        code: IUDBEDR                    # Bank of England Bank Rate, end of period
+        url: "https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes&SeriesCodes=IUDBEDR&UsingCodes=Y&CSVF=TN&Datefrom=01/Jan/2000&Dateto=31/Dec/2026"
+        frequency: monthly
+        aggregation: end_of_period
+        description: Bank of England Bank Rate
+      gbp_usd_rate:
+        code: XUDLUSS                    #  Spot exchange rate, US$ into £, end of period
+        url: "https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes&SeriesCodes=XUDLUSS&UsingCodes=Y&CSVF=TN&Datefrom=01/Jan/2000&Dateto=31/Dec/2026"
+        frequency: monthly
+        aggregation: end_of_period
+        description: GBP/USD spot exchange rate
+
+  fred:
+    api_base: https://api.stlouisfed.org/fred/series/observations
+    api_key_env: FRED_API_KEY
+    rate_limit_sleep_seconds: 0.5
+    series:
+      brent_oil:
+        code: DCOILBRENTEU
+        frequency: daily
+        aggregation: quarterly_mean
+        description: Crude oil prices, Brent (Europe)
+      business_confidence:
+        code: BSCICP02GBM460S            # OECD Business Confidence Indicator for UK (PMI proxy)
+        frequency: monthly
+        aggregation: quarterly_mean
+        description: OECD Business Confidence Indicator for the UK (PMI proxy)
+      consumer_confidence:
+        code: CSCICP02GBM460S            # OECD Consumer Confidence Indicator for UK
+        frequency: monthly
+        aggregation: quarterly_mean
+        description: OECD Consumer Confidence Indicator for the UK
+
+  boe_yc:
+    # BoE Government Liability Curve (nominal spot, monthly archive).
+    # Constant-maturity gilt yields are published as XLSX files inside a
+    # ZIP archive, NOT via the IADB CSV endpoint. The downloader verifies
+    # the ZIP signature on every fetch to defend against BoE's HTTP-200-HTML
+    # error pages, then parses the "4. spot curve" sheet from each XLSX.
+    archive_url: https://www.bankofengland.co.uk/-/media/boe/files/statistics/yield-curves/glcnominalmonthedata.zip
+    sheet_name: "4. spot curve"
+    series:
+      gilt_2y_yield:
+        maturity_years: 2.0
+        frequency: monthly
+        aggregation: end_of_period
+        description: UK 2-year nominal gilt spot yield (BoE GLC monthly archive); feeds yield_curve_slope = 10Y − 2Y
+      gilt_10y_yield:
+        maturity_years: 10.0
+        frequency: monthly
+        aggregation: end_of_period
+        description: UK 10-year nominal gilt spot yield (BoE GLC monthly archive); feeds yield_curve_slope = 10Y − 2Y

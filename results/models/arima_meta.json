@@ -1,0 +1,26 @@
+{
+  "model": "arima",
+  "best_params": {
+    "order": [
+      3,
+      0,
+      0
+    ],
+    "seasonal_order": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "library_versions": {
+    "sklearn": "1.9.0",
+    "xgboost": "3.2.0",
+    "lightgbm": "4.6.0",
+    "statsmodels": "0.14.6"
+  },
+  "training_timestamp": "2026-06-30T17:23:47.232800+00:00",
+  "dataset_hash_md5": "9b72759071dd458fb171a2ca6a778952",
+  "n_training_rows": 104,
+  "random_state": 42
+}

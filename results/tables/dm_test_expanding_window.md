@@ -1,0 +1,10 @@
+**Diebold-Mariano pairwise comparisons (expanding-window CV). Harvey-Leybourne-Newbold small-sample correction applied; reference t-distribution with n minus 1 degrees of freedom. Bonferroni correction applied across the six-comparison family. Where the Bonferroni-corrected p-value is below 0.05, the test indicates a significant difference in forecast accuracy.**
+
+| Model A | Model B | n | Statistic | p-value | p-value (Bonferroni) |
+| --- | --- | --- | --- | --- | --- |
+| arima | ridge | 32 | 1.097 | 0.281 | 1.000 |
+| arima | xgboost | 32 | 1.101 | 0.279 | 1.000 |
+| arima | lightgbm | 32 | 1.094 | 0.283 | 1.000 |
+| ridge | xgboost | 32 | 1.133 | 0.266 | 1.000 |
+| ridge | lightgbm | 32 | 1.012 | 0.319 | 1.000 |
+| xgboost | lightgbm | 32 | -0.048 | 0.962 | 1.000 |
