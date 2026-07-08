@@ -1,7 +1,7 @@
 # Makefile for UK GDP Regime Forecasting
 # Run `make help` to see available targets.
 
-.PHONY: help install download process data eda regimes break-tests figure-regimes figure-cv-splits tune train evaluate all test lint format format-check clean
+.PHONY: help install download process data eda regimes break-tests figure-regimes figure-cv-splits tune train evaluate shap all test lint format format-check clean
 
 help:
 	@echo "Available targets:"
@@ -17,6 +17,7 @@ help:
 	@echo "  tune          Force re-tuning of all models and train; writes results/tuning/ and results/models/"
 	@echo "  train         Train all four models using cached tuning where available; writes results/models/"
 	@echo "  evaluate      Run the Sprint 4 evaluation end-to-end; writes results/{predictions,metrics,tables,figures}/"
+	@echo "  shap          Run the regime-aware SHAP analysis end-to-end; writes results/shap/ and results/figures/shap_*"
 	@echo "  all           Build dataset, run tests, run lint, check formatting"
 	@echo "  test          Run the pytest suite"
 	@echo "  lint          Run ruff linter"
@@ -59,6 +60,9 @@ train:
 
 evaluate:
 	PYTHONPATH=. python scripts/run_evaluation.py
+
+shap:
+	PYTHONPATH=. python -m src.run_shap_analysis
 
 all: data test lint format-check
 
