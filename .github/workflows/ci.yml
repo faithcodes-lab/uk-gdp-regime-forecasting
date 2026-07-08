@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 jobs:
   test:
@@ -34,4 +34,12 @@ jobs:
         run: black --check src/ tests/
 
       - name: Run tests
-        run: pytest -v
+        run: |
+          set +e
+          pytest -v
+          code=$?
+          if [ "$code" -eq 5 ]; then
+            echo "No tests collected (empty scaffold); treating as success."
+            exit 0
+          fi
+          exit $code
