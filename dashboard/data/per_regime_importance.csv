@@ -1,0 +1,18 @@
+,Pre-GFC Stability,Global Financial Crisis,Post-GFC Recovery,Brexit Transition,COVID-19 Shock,Post-COVID Recovery
+gdp_growth,0.03769659,0.37916684,0.046093296,0.043094456,1.4281559,0.051032532
+unemployment_rate,0.0,0.0,0.0,0.0,0.0,0.0
+cpi_inflation,0.0,0.0,0.0,0.0,0.0,0.0
+trade_balance,0.0,0.0,0.0,0.0,0.0,0.0
+gfcf_growth,0.0,0.0,0.0,0.0,0.0,0.0
+govt_consumption_growth,0.0,0.0,0.0,0.0,0.0,0.0
+bank_rate,0.0,0.0,0.0,0.0,0.0,0.0
+gbp_usd_rate,0.0,0.0,0.0,0.0,0.0,0.0
+brent_oil,0.0,0.0,0.0,0.0,0.0,0.0
+business_confidence,0.0,0.0,0.0,0.0,0.0,0.0
+consumer_confidence,0.0,0.0,0.0,0.0,0.0,0.0
+gdp_lag_1,0.0,0.0,0.0,0.0,0.0,0.0
+gdp_lag_4,0.011151024,0.02106872,0.011318763,0.011258856,0.33417892,0.011417434
+gdp_rolling_mean_4q,0.0,0.0,0.0,0.0,0.0,0.0
+gdp_yoy,0.0,0.0,0.0,0.0,0.0,0.0
+business_confidence_rolling_mean_4q,0.0,0.0,0.0,0.0,0.0,0.0
+yield_curve_slope,0.0,0.0,0.0,0.0,0.0,0.0

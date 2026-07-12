@@ -1,0 +1,16 @@
+regime_a,regime_b,spearman_rho,band,involves_small_regime
+Pre-GFC Stability,Global Financial Crisis,0.9999999999999999,stable,True
+Pre-GFC Stability,Post-GFC Recovery,0.9999999999999999,stable,False
+Pre-GFC Stability,Brexit Transition,0.9999999999999999,stable,False
+Pre-GFC Stability,COVID-19 Shock,0.9999999999999999,stable,True
+Pre-GFC Stability,Post-COVID Recovery,0.9999999999999999,stable,False
+Global Financial Crisis,Post-GFC Recovery,0.9999999999999999,stable,True
+Global Financial Crisis,Brexit Transition,0.9999999999999999,stable,True
+Global Financial Crisis,COVID-19 Shock,0.9999999999999999,stable,True
+Global Financial Crisis,Post-COVID Recovery,0.9999999999999999,stable,True
+Post-GFC Recovery,Brexit Transition,0.9999999999999999,stable,False
+Post-GFC Recovery,COVID-19 Shock,0.9999999999999999,stable,True
+Post-GFC Recovery,Post-COVID Recovery,0.9999999999999999,stable,False
+Brexit Transition,COVID-19 Shock,0.9999999999999999,stable,True
+Brexit Transition,Post-COVID Recovery,0.9999999999999999,stable,False
+COVID-19 Shock,Post-COVID Recovery,0.9999999999999999,stable,True
