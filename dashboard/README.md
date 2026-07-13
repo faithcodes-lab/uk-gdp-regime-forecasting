@@ -2,12 +2,11 @@
 title: UK GDP Regime Forecasting Results
 colorFrom: blue
 colorTo: indigo
-sdk: streamlit
-sdk_version: "1.59.1"
-app_file: app.py
+sdk: docker
+app_port: 7860
 pinned: false
 license: mit
-short_description: Model comparison, regime evaluation, and SHAP stability for UK GDP forecasting
+short_description: Model, regime, and SHAP stability results for UK GDP
 ---
 
 # UK GDP regime forecasting: results dashboard
