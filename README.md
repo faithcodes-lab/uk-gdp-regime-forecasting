@@ -5,8 +5,6 @@
 **Author:** Faith Olan-George
 **Programme:** MSc Data Science, University of the West of England (UWE Bristol)
 **Module:** UFCF9Y-60-M (CSCT Masters Project)
-**Student ID:** 25047901
-**Submission:** 3 September 2026
 
 ## Repository Status
 
