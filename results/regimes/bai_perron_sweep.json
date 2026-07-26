@@ -1,0 +1,73 @@
+{
+  "series": "gdp_growth",
+  "model": "rbf",
+  "penalty_grid": [
+    1.0,
+    3.0,
+    5.0,
+    10.0,
+    15.0,
+    20.0,
+    30.0,
+    50.0,
+    100.0
+  ],
+  "results_by_penalty": [
+    {
+      "penalty": 1.0,
+      "n_breaks": 6,
+      "breakpoint_dates": [
+        "2008-12-31",
+        "2010-03-31",
+        "2013-12-31",
+        "2017-09-30",
+        "2020-03-31",
+        "2022-09-30"
+      ]
+    },
+    {
+      "penalty": 3.0,
+      "n_breaks": 2,
+      "breakpoint_dates": [
+        "2020-03-31",
+        "2022-09-30"
+      ]
+    },
+    {
+      "penalty": 5.0,
+      "n_breaks": 0,
+      "breakpoint_dates": []
+    },
+    {
+      "penalty": 10.0,
+      "n_breaks": 0,
+      "breakpoint_dates": []
+    },
+    {
+      "penalty": 15.0,
+      "n_breaks": 0,
+      "breakpoint_dates": []
+    },
+    {
+      "penalty": 20.0,
+      "n_breaks": 0,
+      "breakpoint_dates": []
+    },
+    {
+      "penalty": 30.0,
+      "n_breaks": 0,
+      "breakpoint_dates": []
+    },
+    {
+      "penalty": 50.0,
+      "n_breaks": 0,
+      "breakpoint_dates": []
+    },
+    {
+      "penalty": 100.0,
+      "n_breaks": 0,
+      "breakpoint_dates": []
+    }
+  ],
+  "n_total_observations": 104
+}

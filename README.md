@@ -1,12 +1,10 @@
 # UK GDP Regime Forecasting
 
-> **MSc dissertation research repository.** Forecasting UK GDP Growth Using Interpretable Gradient Boosting: Regime-Aware SHAP Analysis Across Brexit and COVID-19 Structural Breaks (2000–2025).
+> **MSc dissertation research repository.** Forecasting UK GDP Growth Using Interpretable Gradient Boosting: Regime-Aware SHAP Analysis Across the Global Financial Crisis (GFC), Brexit and COVID-19 Structural Breaks (2000–2025).
 
 **Author:** Faith Olan-George
 **Programme:** MSc Data Science, University of the West of England (UWE Bristol)
 **Module:** UFCF9Y-60-M (CSCT Masters Project)
-**Student ID:** 25047901
-**Submission:** 3 September 2026
 
 ## Repository Status
 
@@ -65,6 +63,7 @@ If you use this work, please cite:
 
 ```
 Olan-George, F. (2026). Forecasting UK GDP Growth Using Interpretable Gradient
-Boosting: Regime-Aware SHAP Analysis Across Brexit and COVID-19 Structural
-Breaks. MSc Dissertation, University of the West of England, Bristol.
+Boosting: Regime-Aware SHAP Analysis Across the Global Financial Crisis (GFC),
+Brexit and COVID-19 Structural Breaks. MSc Dissertation, University of the
+West of England, Bristol.
 ```

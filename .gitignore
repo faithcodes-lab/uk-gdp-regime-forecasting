@@ -34,5 +34,21 @@ Thumbs.db
 # Data (large / regenerable)
 data/raw/*
 data/interim/*
+data/lineage/*
+data/processed/*
 !data/raw/.gitkeep
 !data/interim/.gitkeep
+!data/lineage/.gitkeep
+!data/processed/.gitkeep
+
+# Sprint 1 ethics-form rendering working artefacts (not a deliverable)
+data/user-needs/.tmp-form-pages/
+
+# Logs
+logs/*.log
+
+# R session history (stray when an R kernel opens a working file)
+.Rhistory
+
+# Personal viva working notes (private, never committed)
+viva/project-walkthrough.md

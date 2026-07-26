@@ -1,0 +1,18 @@
+,Pre-GFC Stability,Global Financial Crisis,Post-GFC Recovery,Brexit Transition,COVID-19 Shock,Post-COVID Recovery
+gdp_growth,1.0,1.0,1.0,1.0,1.0,1.0
+unemployment_rate,10.0,10.0,10.0,10.0,10.0,10.0
+cpi_inflation,10.0,10.0,10.0,10.0,10.0,10.0
+trade_balance,10.0,10.0,10.0,10.0,10.0,10.0
+gfcf_growth,10.0,10.0,10.0,10.0,10.0,10.0
+govt_consumption_growth,10.0,10.0,10.0,10.0,10.0,10.0
+bank_rate,10.0,10.0,10.0,10.0,10.0,10.0
+gbp_usd_rate,10.0,10.0,10.0,10.0,10.0,10.0
+brent_oil,10.0,10.0,10.0,10.0,10.0,10.0
+business_confidence,10.0,10.0,10.0,10.0,10.0,10.0
+consumer_confidence,10.0,10.0,10.0,10.0,10.0,10.0
+gdp_lag_1,10.0,10.0,10.0,10.0,10.0,10.0
+gdp_lag_4,2.0,2.0,2.0,2.0,2.0,2.0
+gdp_rolling_mean_4q,10.0,10.0,10.0,10.0,10.0,10.0
+gdp_yoy,10.0,10.0,10.0,10.0,10.0,10.0
+business_confidence_rolling_mean_4q,10.0,10.0,10.0,10.0,10.0,10.0
+yield_curve_slope,10.0,10.0,10.0,10.0,10.0,10.0

@@ -1,0 +1,18 @@
+{
+  "model": "xgboost",
+  "best_params": {
+    "xgboost__n_estimators": 50,
+    "xgboost__max_depth": 4,
+    "xgboost__learning_rate": 0.01
+  },
+  "library_versions": {
+    "sklearn": "1.9.0",
+    "xgboost": "3.2.0",
+    "lightgbm": "4.6.0",
+    "statsmodels": "0.14.6"
+  },
+  "training_timestamp": "2026-06-30T17:23:47.181344+00:00",
+  "dataset_hash_md5": "9b72759071dd458fb171a2ca6a778952",
+  "n_training_rows": 103,
+  "random_state": 42
+}
