@@ -81,7 +81,7 @@ def cache_raw_response(source: str, series: str, content: bytes, ext: str) -> Pa
     """
 
     cache_dir = api_cache_dir(source)
-    ts = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    ts = dt.datetime.now(dt.UTC).strftime("%Y%m%dT%H%M%S%fZ")
     out = cache_dir / f"{series}__{ts}.{ext}"
     out.write_bytes(content)
     # Keep the 5 most recent snapshots per (source, series, ext) so debugging

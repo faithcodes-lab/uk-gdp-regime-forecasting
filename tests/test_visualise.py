@@ -8,13 +8,13 @@ import matplotlib
 
 matplotlib.use("Agg")  # headless backend for tests
 
-import matplotlib.figure  # noqa: E402
-import matplotlib.pyplot as plt  # noqa: E402
-import pandas as pd  # noqa: E402
-import pytest  # noqa: E402
-from PIL import Image  # noqa: E402
+import matplotlib.figure
+import matplotlib.pyplot as plt
+import pandas as pd
+import pytest
+from PIL import Image
 
-from src.regimes.visualise import plot_gdp_with_regimes  # noqa: E402
+from src.regimes.visualise import plot_gdp_with_regimes
 
 
 def _real_regimes() -> list[dict]:

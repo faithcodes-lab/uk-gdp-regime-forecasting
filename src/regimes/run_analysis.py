@@ -160,7 +160,7 @@ def _run_bai_perron_sweep(
         "model": "rbf",
         "penalty_grid": penalties_used,
         "results_by_penalty": results_by_penalty,
-        "n_total_observations": int(len(series)),
+        "n_total_observations": len(series),
     }
     return sensitivity_df, sweep_payload, penalties_used
 

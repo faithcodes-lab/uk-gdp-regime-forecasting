@@ -66,7 +66,7 @@ def patched_generate_predictions(monkeypatch):
     """Monkeypatches the orchestrator's generate_predictions to return synthetic rows."""
     df = _synthetic_predictions()
 
-    def _fake(_df, output_path=None):  # noqa: ARG001 (signature mirrors the real function)
+    def _fake(_df, output_path=None):
         return df.copy()
 
     monkeypatch.setattr(orchestrator, "generate_predictions", _fake)

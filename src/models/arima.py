@@ -49,7 +49,9 @@ def select_arima_order(
                         best_order = (p, d, q)
                 except Exception:
                     # Skip orders that fail to fit; common for short series
-                    # or near-non-stationary data. Continue the grid search.
+                    # or series that are close to nonstationary. Statsmodels
+                    # can raise several different exception types here.
+                    # Continue the grid search.
                     continue
     return best_order
 
@@ -103,7 +105,7 @@ class ARIMAModel(ForecastingModel):
         self.seasonal_order = seasonal_order
         self._fitted: Any = None
 
-    def fit(self, X: pd.DataFrame, y: pd.Series) -> "ARIMAModel":
+    def fit(self, X: pd.DataFrame, y: pd.Series) -> ARIMAModel:
         """Fits ARIMA on y. X is ignored, accepted only for interface compatibility."""
         if self.order is None:
             self.order = select_arima_order(y)

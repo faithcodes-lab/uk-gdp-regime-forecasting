@@ -18,7 +18,7 @@ class ForecastingModel(ABC):
     """Shared interface for every Sprint 3 forecasting model."""
 
     @abstractmethod
-    def fit(self, X: pd.DataFrame, y: pd.Series) -> "ForecastingModel":
+    def fit(self, X: pd.DataFrame, y: pd.Series) -> ForecastingModel:
         """Trains the model on the given features and target. Returns self for chaining."""
 
     @abstractmethod

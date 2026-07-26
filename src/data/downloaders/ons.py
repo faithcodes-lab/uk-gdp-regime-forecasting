@@ -139,4 +139,4 @@ def _ons_date_to_iso(raw: str) -> str:
 
 
 # Re-export for tests to monkeypatch the requests symbol cleanly.
-__all__ = ["download_ons_series", "download_all_ons"]
+__all__ = ["download_all_ons", "download_ons_series"]

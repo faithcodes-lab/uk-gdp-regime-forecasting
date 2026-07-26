@@ -61,7 +61,7 @@ def test_load_best_model_picks_lower_rmse_gradient_booster(tmp_path, monkeypatch
     fitted = XGBForecastingModel(max_depth=2, n_estimators=5).fit(X, y)
     joblib.dump(fitted, models_dir / "xgboost.joblib")
 
-    import src.explainability.shap_compute as shap_compute
+    from src.explainability import shap_compute
 
     monkeypatch.setattr(shap_compute, "_MODELS_DIR", models_dir)
     model, name = load_best_model(metrics_path=metrics_path)
@@ -89,7 +89,7 @@ def test_load_best_model_ignores_non_gradient_boosting_models(tmp_path, monkeypa
     fitted = XGBForecastingModel(max_depth=2, n_estimators=5).fit(X, y)
     joblib.dump(fitted, models_dir / "xgboost.joblib")
 
-    import src.explainability.shap_compute as shap_compute
+    from src.explainability import shap_compute
 
     monkeypatch.setattr(shap_compute, "_MODELS_DIR", models_dir)
     _, name = load_best_model(metrics_path=metrics_path)

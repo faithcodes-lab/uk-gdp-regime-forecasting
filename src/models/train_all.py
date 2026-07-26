@@ -11,9 +11,10 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from datetime import datetime, timezone
+from collections.abc import Callable
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 import joblib
 import lightgbm
@@ -131,7 +132,7 @@ def _build_arima_result(y: pd.Series) -> dict[str, Any]:
         "n_iter": None,
         "n_splits": None,
         "random_state": _RANDOM_STATE,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }
 
 
@@ -183,7 +184,7 @@ def _persist(
         "model": name,
         "best_params": best_params,
         "library_versions": _library_versions(),
-        "training_timestamp": datetime.now(timezone.utc).isoformat(),
+        "training_timestamp": datetime.now(UTC).isoformat(),
         "dataset_hash_md5": dataset_hash,
         "n_training_rows": n_rows,
         "random_state": _RANDOM_STATE,

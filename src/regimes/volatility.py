@@ -205,7 +205,7 @@ def icss_test(
         return ICSSResult(
             method=_METHOD_NAME,
             series_name=series_name,
-            n_observations=int(len(clean)),
+            n_observations=len(clean),
             significance_level=alpha,
             critical_value=critical_value,
             breakpoint_dates=[],
@@ -226,7 +226,7 @@ def icss_test(
     return ICSSResult(
         method=_METHOD_NAME,
         series_name=series_name,
-        n_observations=int(len(clean)),
+        n_observations=len(clean),
         significance_level=alpha,
         critical_value=critical_value,
         breakpoint_dates=breakpoint_dates,

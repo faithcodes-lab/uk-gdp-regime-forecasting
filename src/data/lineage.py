@@ -40,7 +40,7 @@ class LineageRecord:
 
     def __post_init__(self) -> None:
         if not self.timestamp_utc:
-            self.timestamp_utc = dt.datetime.now(dt.timezone.utc).isoformat()
+            self.timestamp_utc = dt.datetime.now(dt.UTC).isoformat()
         if not self.git_commit:
             self.git_commit = current_git_commit()
 

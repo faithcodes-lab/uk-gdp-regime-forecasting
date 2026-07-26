@@ -5,19 +5,20 @@ structural and guard behaviour.
 """
 
 from __future__ import annotations
-from src.models.visualise_cv import plot_cv_splits
-import pytest
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.figure
 
 import matplotlib
+import matplotlib.figure
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import pytest
+
+from src.models.visualise_cv import plot_cv_splits
 
 matplotlib.use("Agg")  # headless backend for tests
 
 
-from src.models.cv import (  # noqa: E402
+from src.models.cv import (
     cross_validate_arima,
     expanding_window_splits,
     regime_aligned_splits,
