@@ -282,8 +282,8 @@ def test_train_all_joblib_bytes_are_reproducible(tmp_path, monkeypatch):
         for name in ["ridge", "xgboost", "lightgbm", "arima"]
     }
 
-    for name in first_bytes:
-        assert first_bytes[name] == second_bytes[name], f"joblib bytes differ for {name}"
+    for name, value in first_bytes.items():
+        assert value == second_bytes[name], f"joblib bytes differ for {name}"
 
 
 def test_train_all_fails_clearly_when_data_missing(tmp_path, monkeypatch):

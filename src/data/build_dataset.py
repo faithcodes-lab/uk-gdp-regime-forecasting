@@ -19,8 +19,8 @@ CLI:
 from __future__ import annotations
 
 import argparse
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 import pandas as pd
 from loguru import logger

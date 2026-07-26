@@ -31,8 +31,8 @@ from src.explainability.regime_shap import (
 from src.explainability.shap_compute import (
     compute_shap_values,
     load_best_model,
-    load_global_X,
     load_global_regimes,
+    load_global_X,
 )
 from src.explainability.stability import (
     bootstrap_rankings,

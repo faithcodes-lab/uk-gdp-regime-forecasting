@@ -187,7 +187,7 @@ def tune_penalty(
 
 
 __all__ = [
-    "detect_breaks_pelt",
     "detect_breaks_binseg",
+    "detect_breaks_pelt",
     "tune_penalty",
 ]

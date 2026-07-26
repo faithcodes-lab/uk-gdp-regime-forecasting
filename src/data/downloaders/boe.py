@@ -15,7 +15,6 @@ from loguru import logger
 from data.schemas.raw_boe_rate import BOE_RATE_RAW_SCHEMA
 from data.schemas.raw_ons import RAW_ONS_SCHEMA
 from src.data.config import pipeline_config
-
 from src.data.downloaders._common import (
     cache_raw_response,
     require_resolved,
@@ -97,4 +96,4 @@ def _parse_iadb_csv(text: str) -> pd.DataFrame:
     return df[["date", "value"]].dropna().sort_values("date").reset_index(drop=True)
 
 
-__all__ = ["download_boe_series", "download_all_boe"]
+__all__ = ["download_all_boe", "download_boe_series"]

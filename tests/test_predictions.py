@@ -9,7 +9,7 @@ retraining proof), and test_no_target_quarter_appears_in_its_own_training_fold
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 import numpy as np
 import pandas as pd
@@ -72,7 +72,7 @@ def _stub_load_tuning_result(path: Path | str) -> dict[str, Any]:
 class _StubModel:
     """Trivial sklearn model substitute: records fit calls, returns zero predictions."""
 
-    fit_calls: list[dict[str, Any]] = []
+    fit_calls: ClassVar[list[dict[str, Any]]] = []
 
     def __init__(self, **kwargs):
         self.kwargs = kwargs

@@ -10,10 +10,10 @@ richer than it is.
 
 from __future__ import annotations
 
+import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.colors import BoundaryNorm, ListedColormap
 from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
 
 _STABLE = 0.6
 _MODERATE = 0.3

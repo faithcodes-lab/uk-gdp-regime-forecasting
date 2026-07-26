@@ -49,7 +49,7 @@ class RidgeForecastingModel(ForecastingModel):
         self.random_state = random_state
         self._pipeline: Pipeline = build_ridge_pipeline(alpha=alpha, random_state=random_state)
 
-    def fit(self, X: pd.DataFrame, y: pd.Series) -> "RidgeForecastingModel":
+    def fit(self, X: pd.DataFrame, y: pd.Series) -> RidgeForecastingModel:
         """Fits the pipeline on the given features and target. Returns self for chaining."""
         self._pipeline.fit(X, y)
         return self

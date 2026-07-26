@@ -81,7 +81,7 @@ class LGBMForecastingModel(ForecastingModel):
             random_state=random_state,
         )
 
-    def fit(self, X: pd.DataFrame, y: pd.Series) -> "LGBMForecastingModel":
+    def fit(self, X: pd.DataFrame, y: pd.Series) -> LGBMForecastingModel:
         """Fits the pipeline on the given features and target. Returns self for chaining."""
         self._pipeline.fit(X, y)
         return self

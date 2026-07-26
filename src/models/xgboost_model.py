@@ -70,7 +70,7 @@ class XGBForecastingModel(ForecastingModel):
             random_state=random_state,
         )
 
-    def fit(self, X: pd.DataFrame, y: pd.Series) -> "XGBForecastingModel":
+    def fit(self, X: pd.DataFrame, y: pd.Series) -> XGBForecastingModel:
         """Fits the pipeline on the given features and target. Returns self for chaining."""
         self._pipeline.fit(X, y)
         return self

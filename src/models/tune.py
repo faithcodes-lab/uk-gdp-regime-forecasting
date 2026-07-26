@@ -9,7 +9,7 @@ ARIMA is not tuned here; its order is selected once via select_arima_order.
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -84,7 +84,7 @@ def _result_dict(
         "n_iter": n_iter,
         "n_splits": n_splits,
         "random_state": random_state,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }
 
 

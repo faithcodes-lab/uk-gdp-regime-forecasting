@@ -105,4 +105,4 @@ def _parse_fred_response(payload: dict[str, Any]) -> pd.DataFrame:
     return df[["date", "value"]].dropna(subset=["value"]).reset_index(drop=True)
 
 
-__all__ = ["download_fred_series", "download_all_fred"]
+__all__ = ["download_all_fred", "download_fred_series"]

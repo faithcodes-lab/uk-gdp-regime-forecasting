@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import itertools
 
 from src.data.config import features_config, pipeline_config, regimes_config
 
@@ -114,7 +115,7 @@ def test_regime_dates_parse_as_dates() -> None:
 
 def test_regimes_are_ordered_and_non_overlapping() -> None:
     regimes = regimes_config()["regimes"]
-    for current, nxt in zip(regimes, regimes[1:]):
+    for current, nxt in itertools.pairwise(regimes):
         assert current["end"] < nxt["start"], (
             f"Regime {current['label']} ends {current['end']} but "
             f"{nxt['label']} starts {nxt['start']}"
