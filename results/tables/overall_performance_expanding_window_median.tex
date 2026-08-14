@@ -1,0 +1,13 @@
+\begin{table}
+\caption{Overall forecast accuracy (expanding-window CV). Lower values indicate better performance for RMSE, MAE, and MASE; higher R2 indicates better fit. Median across folds with interquartile range in parentheses.}
+\begin{tabular}{lrrrr}
+\toprule
+Model & RMSE & MAE & MASE & R2 \\
+\midrule
+arima & 0.360 (1.784) & 0.342 (1.652) & 0.298 (1.438) & -2.120 (6.203) \\
+lightgbm & 0.502 (1.447) & 0.391 (1.087) & 0.340 (0.946) & -1.320 (8.554) \\
+ridge & 0.325 (2.143) & 0.295 (2.064) & 0.257 (1.796) & -0.969 (4.355) \\
+xgboost & 0.355 (0.974) & 0.321 (0.738) & 0.279 (0.642) & -0.745 (2.248) \\
+\bottomrule
+\end{tabular}
+\end{table}
