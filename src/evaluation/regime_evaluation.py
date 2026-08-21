@@ -30,6 +30,13 @@ def evaluate_per_regime(
     MASE is scaled by the full y_train series so the value is comparable
     across all rows of the output, not just within a single (model, scheme).
     Empty (model, scheme, regime) combinations are silently skipped.
+
+    n_observations is the raw prediction count, which double-counts quarters
+    tested in multiple folds under the regime-aligned scheme (Section 3.6).
+    small_sample is therefore flagged on n_quarters, the count of distinct
+    tested quarters, not on n_observations; otherwise a regime like COVID-19
+    Shock (6 quarters, tested across 4 regime-aligned folds, n_observations=24)
+    would silently escape the small-sample flag it should carry.
     """
     rows: list[dict[str, Any]] = []
     for (model_name, scheme, regime), group in predictions_df.groupby(
@@ -38,6 +45,7 @@ def evaluate_per_regime(
         n = len(group)
         if n == 0:
             continue
+        n_quarters = group["quarter"].nunique()
         y_true = group["y_true"].to_numpy()
         y_pred = group["y_pred"].to_numpy()
         rows.append(
@@ -46,11 +54,12 @@ def evaluate_per_regime(
                 "scheme": scheme,
                 "regime": regime,
                 "n_observations": n,
+                "n_quarters": n_quarters,
                 "rmse": compute_rmse(y_true, y_pred),
                 "mae": compute_mae(y_true, y_pred),
                 "mase": compute_mase(y_true, y_pred, y_train),
                 "r2": compute_r2(y_true, y_pred),
-                "small_sample": n < small_sample_threshold,
+                "small_sample": n_quarters < small_sample_threshold,
             }
         )
     return pd.DataFrame(rows)
