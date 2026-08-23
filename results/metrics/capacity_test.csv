@@ -1,0 +1,5 @@
+variant,n_estimators,max_depth,learning_rate,active_features,rmse,mae
+"Baseline (50 trees, depth 4, lr 0.01)",50,4,0.01,2,2.397390785115773,1.8732785735279318
+More trees (50 to 500),500,4,0.01,15,2.6319909706727986,2.0356670071138065
+Higher learning rate (0.01 to 0.1),500,4,0.1,17,2.6890018331567362,2.0936846458236684
+Deeper trees (depth 4 to 6),500,6,0.1,17,2.702826346570897,2.0934739322896343
