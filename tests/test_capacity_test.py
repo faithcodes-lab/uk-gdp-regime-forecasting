@@ -11,7 +11,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from scripts.capacity_test import _active_feature_count, _VARIANTS
+from scripts.capacity_test import _VARIANTS, _active_feature_count
 
 
 def test_variants_cumulative_not_isolated():
