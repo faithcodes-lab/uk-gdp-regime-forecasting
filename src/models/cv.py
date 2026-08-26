@@ -1,6 +1,6 @@
 """Splitters that cut the data into time-aware folds for cross-validation.
 
-Two ways to split are provided. Both guarantee the test set sits
+Three ways to split are provided. All guarantee the test set sits
 entirely after the training set, so the model never sees the future
 during training.
 
@@ -11,7 +11,13 @@ during training.
   far and tests on the regimes that come after, showing how a model
   handles a regime it has not learned from. Secondary scheme.
 
-Both return row indices only and never modify the input data.
+- ``rolling_window_splits``: each fold trains on a fixed-size window of
+  the most recent quarters, sliding forward rather than growing, and
+  tests on the same fold boundaries as ``expanding_window_splits``.
+  Confirmatory scheme, used to check whether a finding is a side effect
+  of the training set growing over time under the primary scheme.
+
+All return row indices only and never modify the input data.
 
 Three things the caller must still get right:
 
@@ -156,6 +162,71 @@ def regime_aligned_splits(
         test_regimes_list = regimes_in_order[k:]
         train_idx = np.where(np.isin(regime_values, train_regimes_list))[0]
         test_idx = np.where(np.isin(regime_values, test_regimes_list))[0]
+        splits.append((train_idx, test_idx))
+    return splits
+
+
+def rolling_window_splits(
+    X: pd.DataFrame,
+    n_splits: int = 8,
+    test_size: int = 4,
+    window_size: int | None = None,
+) -> list[tuple[np.ndarray, np.ndarray]]:
+    """Splits the data into training and test sets of fixed size that slide forward over time.
+
+    Unlike ``expanding_window_splits``, the training set does not grow;
+    older quarters drop off the start as newer ones are added at the
+    end, so every fold trains on the same number of quarters. Test fold
+    boundaries are identical to ``expanding_window_splits`` with the
+    same ``n_splits`` and ``test_size``, so RMSE/MAE from the two
+    schemes are directly comparable: any difference reflects the
+    training window's shape (fixed vs growing), not different test data.
+
+    Parameters
+    X : pd.DataFrame
+        Feature matrix. Must be sorted by date. Only ``len(X)`` is used.
+    n_splits : int, default 8
+        Number of folds.
+    test_size : int, default 4
+        Number of rows in each fold's test set.
+    window_size : int or None, default None
+        Number of rows in each fold's training set. Defaults to the
+        first fold's training size under ``expanding_window_splits``
+        (``len(X) - n_splits * test_size``), so the first fold of both
+        schemes trains on an identical window.
+
+    Returns:
+    list of (train_idx, test_idx) tuples
+        Each tuple is two numpy int arrays of row positions in X.
+
+    Raises:
+    ValueError
+        If ``len(X)`` is too small to give the first fold at least
+        ``MIN_TRAIN_SIZE`` training rows, or if ``window_size`` is
+        smaller than ``MIN_TRAIN_SIZE``.
+    """
+    n = len(X)
+    min_required = n_splits * test_size + MIN_TRAIN_SIZE
+    if n < min_required:
+        raise ValueError(
+            f"len(X)={n} is too small for n_splits={n_splits}, "
+            f"test_size={test_size}; need at least {min_required} rows "
+            f"(MIN_TRAIN_SIZE={MIN_TRAIN_SIZE})."
+        )
+
+    first_train_end = n - n_splits * test_size
+    if window_size is None:
+        window_size = first_train_end
+    if window_size < MIN_TRAIN_SIZE:
+        raise ValueError(f"window_size={window_size} is below MIN_TRAIN_SIZE={MIN_TRAIN_SIZE}.")
+
+    splits: list[tuple[np.ndarray, np.ndarray]] = []
+    for k in range(n_splits):
+        train_end = first_train_end + k * test_size
+        train_start = max(0, train_end - window_size)
+        test_end = train_end + test_size
+        train_idx = np.arange(train_start, train_end, dtype=int)
+        test_idx = np.arange(train_end, test_end, dtype=int)
         splits.append((train_idx, test_idx))
     return splits
 

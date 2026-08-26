@@ -22,6 +22,7 @@ from src.models.cv import (
     cross_validate_arima,
     expanding_window_splits,
     regime_aligned_splits,
+    rolling_window_splits,
 )
 
 # helpers
@@ -73,6 +74,9 @@ def test_no_train_test_overlap():
     for train_idx, test_idx in regime_aligned_splits(X):
         assert set(train_idx).isdisjoint(set(test_idx))
 
+    for train_idx, test_idx in rolling_window_splits(X, n_splits=8, test_size=4):
+        assert set(train_idx).isdisjoint(set(test_idx))
+
 
 def test_train_temporally_before_test():
     """Every fold's max train index is strictly less than its min test index, in either scheme.
@@ -95,6 +99,14 @@ def test_train_temporally_before_test():
     for fold_idx, (train_idx, test_idx) in enumerate(regime_aligned_splits(X)):
         assert train_idx.max() < test_idx.min(), (
             f"regime aligned fold {fold_idx + 1}: max train idx "
+            f"{train_idx.max()} is not strictly less than min test idx {test_idx.min()}"
+        )
+
+    for fold_idx, (train_idx, test_idx) in enumerate(
+        rolling_window_splits(X, n_splits=8, test_size=4)
+    ):
+        assert train_idx.max() < test_idx.min(), (
+            f"rolling window fold {fold_idx + 1}: max train idx "
             f"{train_idx.max()} is not strictly less than min test idx {test_idx.min()}"
         )
 
@@ -147,6 +159,66 @@ def test_expanding_window_expanding_train_size():
     # consecutive differences should all equal test_size
     diffs = [sizes[i + 1] - sizes[i] for i in range(len(sizes) - 1)]
     assert all(d == 4 for d in diffs), f"train sizes not monotonically +4: {sizes}"
+
+
+# rolling window structural tests
+
+
+def test_rolling_window_yields_n_splits_folds():
+    """n_splits=8 produces exactly 8 folds."""
+    X = _dummy_X(104)
+    splits = rolling_window_splits(X, n_splits=8, test_size=4)
+    assert len(splits) == 8
+
+
+def test_rolling_window_train_size_constant():
+    """Unlike expanding_window_splits, every fold's training set has the same size."""
+    X = _dummy_X(104)
+    splits = rolling_window_splits(X, n_splits=8, test_size=4)
+    sizes = {len(train_idx) for train_idx, _ in splits}
+    assert len(sizes) == 1, f"train sizes should all be equal, got {sizes}"
+
+
+def test_rolling_window_matches_expanding_window_test_folds():
+    """Test fold boundaries are identical to expanding_window_splits, so RMSE is directly comparable."""
+    X = _dummy_X(104)
+    expanding = expanding_window_splits(X, n_splits=8, test_size=4)
+    rolling = rolling_window_splits(X, n_splits=8, test_size=4)
+    for (_, exp_test), (_, roll_test) in zip(expanding, rolling):
+        np.testing.assert_array_equal(exp_test, roll_test)
+
+
+def test_rolling_window_first_fold_matches_expanding_window_first_fold():
+    """With the default window_size, the first fold's training set is identical to expanding_window_splits'."""
+    X = _dummy_X(104)
+    expanding = expanding_window_splits(X, n_splits=8, test_size=4)
+    rolling = rolling_window_splits(X, n_splits=8, test_size=4)
+    np.testing.assert_array_equal(expanding[0][0], rolling[0][0])
+
+
+def test_rolling_window_slides_forward_dropping_oldest_rows():
+    """By the last fold, the training window no longer contains the earliest rows."""
+    X = _dummy_X(104)
+    splits = rolling_window_splits(X, n_splits=8, test_size=4)
+    first_train_idx, _ = splits[0]
+    last_train_idx, _ = splits[-1]
+    assert last_train_idx.min() > first_train_idx.min()
+
+
+def test_rolling_window_raises_when_window_size_below_minimum():
+    """A window_size below MIN_TRAIN_SIZE raises a ValueError."""
+    from src.models.cv import MIN_TRAIN_SIZE
+
+    X = _dummy_X(104)
+    with pytest.raises(ValueError, match="MIN_TRAIN_SIZE"):
+        rolling_window_splits(X, n_splits=8, test_size=4, window_size=MIN_TRAIN_SIZE - 1)
+
+
+def test_rolling_window_raises_when_sample_too_small():
+    """Calling on too few rows raises a ValueError matching 'too small'."""
+    X = _dummy_X(30)
+    with pytest.raises(ValueError, match="too small"):
+        rolling_window_splits(X, n_splits=8, test_size=4)
 
 
 # regime aligned structural tests
