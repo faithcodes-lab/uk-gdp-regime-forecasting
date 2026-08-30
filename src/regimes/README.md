@@ -36,7 +36,7 @@ Each target is independent and idempotent. `make regimes` reads from `config/reg
 2. Re-run `make regimes` to rewrite the regime column on the parquet.
 3. Re-run `make break-tests`: only the Chow test changes meaningfully, because Bai-Perron and ICSS are series-only and regenerate identical output.
 4. Re-run `make figure-regimes`. The figure auto-loads from `regimes.yaml`.
-5. Append a new entry to `report/decision-log.md` explaining why the boundaries moved.
+5. Record why the boundaries moved.
 
 ## Date-basis convention
 
@@ -72,8 +72,8 @@ Each test file is self-contained and uses synthetic data; only `tests/test_visua
 
 `volatility.py` implements the ICSS variance break test as a third instrument alongside Chow and Bai-Perron. The orchestrator writes its result to `results/regimes/icss_results.json` with a GFC evidence block that lists every detected variance break falling inside the GFC regime window and reports its distance, in quarters, from the current GFC start date.
 
-The test itself is a standard part of the methodology. The exact GFC and Post-GFC Recovery boundary dates are an open question under supervisor discussion (see the relevant entry in `report/decision-log.md`); the dates may or may not move in a future revision of `config/regimes.yaml`.
+The test itself is a standard part of the methodology. The exact GFC and Post-GFC Recovery boundary dates are an open question under supervisor discussion; the dates may or may not move in a future revision of `config/regimes.yaml`.
 
 ## Why this package exists
 
-The dissertation's novel contribution is regime-aware SHAP analysis. That analysis only makes sense if the regime definitions are defensible. This package produces the evidence base for that defence: literature-motivated boundaries from `config/regimes.yaml`, statistical evidence from the three break tests (Chow, Bai-Perron, ICSS), and a clean figure for the methodology chapter. Methodological decisions made here are recorded in `report/decision-log.md`.
+The dissertation's novel contribution is regime-aware SHAP analysis. That analysis only makes sense if the regime definitions are defensible. This package produces the evidence base for that defence: literature-motivated boundaries from `config/regimes.yaml`, statistical evidence from the three break tests (Chow, Bai-Perron, ICSS), and a clean figure for the methodology chapter.

@@ -38,6 +38,33 @@ def _synthetic_predictions_df(n_per_regime: dict[str, int], seed: int = 42) -> p
     return pd.DataFrame(rows)
 
 
+def _synthetic_regime_aligned_predictions_df(
+    n_quarters: int, n_folds: int, seed: int = 42
+) -> pd.DataFrame:
+    """Builds a predictions DataFrame where n_quarters distinct quarters are each
+    repeated across n_folds folds, matching how regime-aligned CV re-tests a
+    later regime in every subsequent fold (Section 3.6). n_observations for
+    the regime is n_quarters * n_folds, but n_quarters stays n_quarters.
+    """
+    rng = np.random.default_rng(seed)
+    quarters = [pd.Timestamp("2020-01-01") + pd.Timedelta(days=i * 90) for i in range(n_quarters)]
+    rows: list[dict] = []
+    for fold_idx in range(n_folds):
+        for quarter in quarters:
+            rows.append(
+                {
+                    "model": "xgboost",
+                    "quarter": quarter,
+                    "regime": "COVID-19 Shock",
+                    "y_true": float(rng.normal()),
+                    "y_pred": float(rng.normal()),
+                    "fold_idx": fold_idx,
+                    "scheme": "regime_aligned",
+                }
+            )
+    return pd.DataFrame(rows)
+
+
 def _y_train_series(n: int = 50, seed: int = 42) -> pd.Series:
     """Builds a synthetic training y series for MASE scaling."""
     rng = np.random.default_rng(seed)
@@ -54,6 +81,7 @@ def test_evaluate_per_regime_returns_expected_columns():
         "scheme",
         "regime",
         "n_observations",
+        "n_quarters",
         "rmse",
         "mae",
         "mase",
@@ -123,6 +151,31 @@ def test_evaluate_per_regime_does_not_flag_large_regime():
     y_train = _y_train_series()
     result = evaluate_per_regime(df, y_train)
     assert not result["small_sample"].any()
+
+
+def test_evaluate_per_regime_n_quarters_counts_distinct_quarters_not_rows():
+    """n_quarters is the count of distinct quarters, not the row count, when a
+    regime's quarters are repeated across folds (regime-aligned scheme)."""
+    df = _synthetic_regime_aligned_predictions_df(n_quarters=6, n_folds=4)
+    y_train = _y_train_series()
+    result = evaluate_per_regime(df, y_train)
+    row = result.iloc[0]
+    assert row["n_observations"] == 24
+    assert row["n_quarters"] == 6
+
+
+def test_evaluate_per_regime_flags_small_sample_by_unique_quarters_even_when_n_observations_is_large():
+    """A regime with only 6 unique quarters, tested across 4 folds (n_observations=24,
+    which is >= the default threshold of 10), must still be flagged small_sample.
+    This is the regression test for the bug where the regime_heatmap figure
+    silently missed COVID-19 Shock as small-sample under regime-aligned CV,
+    because the flag was keyed on n_observations instead of n_quarters."""
+    df = _synthetic_regime_aligned_predictions_df(n_quarters=6, n_folds=4)
+    y_train = _y_train_series()
+    result = evaluate_per_regime(df, y_train)
+    row = result.iloc[0]
+    assert row["n_observations"] >= 10
+    assert row["small_sample"]
 
 
 def test_evaluate_per_regime_threshold_is_parameterisable():
