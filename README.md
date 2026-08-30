@@ -12,7 +12,7 @@
 
 ## Overview
 
-Four models (ARIMA, Ridge, XGBoost, LightGBM) are trained on 104 quarters of UK GDP growth across six economic regimes spanning the Global Financial Crisis, Brexit and COVID-19. The trained models are the basis for this project's actual question: whether a model's SHAP feature-importance explanations stay stable as the economy moves through structural breaks, since an explanation that only holds in calm periods is a weak basis for policy use.
+Four models (ARIMA, Ridge, XGBoost, LightGBM) are trained on 104 quarters of UK GDP growth across six economic regimes spanning the Global Financial Crisis, Brexit and COVID-19. The trained models are the basis for this project's actual question: whether a model's SHAP feature-importance explanations stay stable as the economy moves through structural breaks, because policymakers need explanations that hold up across changing conditions, not just calm ones.
 
 ## Key findings
 
