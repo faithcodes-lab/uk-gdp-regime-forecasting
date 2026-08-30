@@ -30,7 +30,7 @@ The regime-aware SHAP stability methodology developed here has been extracted in
 
 - **[regime-shap](https://github.com/faithcodes-lab/regime-shap)** — `pip install regime-shap`. [PyPI](https://pypi.org/project/regime-shap/) · [Docs](https://faithcodes-lab.github.io/regime-shap/)
 
-An interactive Plotly dashboard covering model comparison, regime evaluation, SHAP explanations and the stability matrix for this project's GDP results is also built and deployed to Hugging Face Spaces (currently private).
+An interactive Plotly dashboard covering model comparison, regime evaluation, SHAP explanations and the stability matrix for this project's GDP results is also live: **[uk-gdp-results-dashboard](https://huggingface.co/spaces/FaithCodes/uk-gdp-results-dashboard)** on Hugging Face Spaces.
 
 ## Setup
 
