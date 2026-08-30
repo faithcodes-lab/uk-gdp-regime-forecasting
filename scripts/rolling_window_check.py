@@ -8,9 +8,8 @@ rolling window (same test folds, same cached hyperparameters, but a
 training set that slides forward instead of accumulating) should give
 a different answer.
 
-No committed script or results file previously existed for this test;
-report/decision-log.md has no entry for it either. The dissertation
-text asserts the rolling-window scheme "provides the same results as
+No committed script or results file previously existed for this test.
+The dissertation text asserts the rolling-window scheme "provides the same results as
 the expanding-window scheme," but that specific comparison could not be
 independently verified before this script existed. This script
 reconstructs the methodology (rolling_window_splits in src/models/cv.py,

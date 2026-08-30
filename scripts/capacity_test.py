@@ -11,7 +11,7 @@ the baseline. Each refits under the same 8-fold expanding-window CV as
 the main evaluation, and separately fits once on the full history to
 count how many features the model actually uses (nonzero gain-based
 feature_importances_), mirroring how the SHAP zero-importance result
-was cross-checked in report/decision-log.md.
+was cross-checked.
 
 Run with
     PYTHONPATH=. python scripts/capacity_test.py
