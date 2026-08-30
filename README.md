@@ -12,7 +12,7 @@
 
 ## Overview
 
-Four models (ARIMA, Ridge, XGBoost, LightGBM) are trained on 104 quarters of UK GDP growth and compared across six economic regimes spanning the Global Financial Crisis, Brexit and COVID-19. The project's core question is not just which model forecasts best, but whether the model's SHAP feature-importance explanations stay stable as the economy moves through structural breaks, since an explanation that only holds in calm periods is a weak basis for policy use.
+Four models (ARIMA, Ridge, XGBoost, LightGBM) are trained on 104 quarters of UK GDP growth across six economic regimes spanning the Global Financial Crisis, Brexit and COVID-19. The trained models are the basis for this project's actual question: whether a model's SHAP feature-importance explanations stay stable as the economy moves through structural breaks, because policymakers need explanations that hold up across changing conditions, not just calm ones.
 
 ## Key findings
 
@@ -51,18 +51,17 @@ cp .env.example .env
 
 ## Repository Structure
 
-```
+<pre>
 uk-gdp-regime-forecasting/
-├── config/                   # Configuration files (data sources, models)
-├── data/                     # Data lifecycle (raw → interim → processed)
-├── src/                      # Source code (data, models, evaluation, explainability)
-├── tests/                    # Pytest test suite
-├── notebooks/                # Exploratory notebooks
-├── scripts/                  # Standalone scripts (master pipelines, utilities)
-├── results/                  # Pipeline outputs (models, figures, tables, SHAP)
-├── dashboard/                # Streamlit + Plotly results dashboard
-└── .github/                  # CI workflows
-```
+├── <a href="config/">config/</a>                   # Configuration files (data sources, models)
+├── <a href="data/">data/</a>                     # Data lifecycle (raw → interim → processed)
+├── <a href="src/">src/</a>                      # Source code (data, models, evaluation, explainability)
+├── <a href="tests/">tests/</a>                    # Pytest test suite
+├── <a href="scripts/">scripts/</a>                  # Standalone scripts (master pipelines, utilities)
+├── <a href="results/">results/</a>                  # Pipeline outputs (models, figures, tables, SHAP)
+├── <a href="dashboard/">dashboard/</a>                # Streamlit + Plotly results dashboard
+└── <a href=".github/">.github/</a>                 # CI workflows
+</pre>
 
 ## Quick Start
 
