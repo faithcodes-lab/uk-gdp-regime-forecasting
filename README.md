@@ -54,7 +54,7 @@ cp .env.example .env
 <pre>
 uk-gdp-regime-forecasting/
 ├── <a href="config/">config/</a>                   # Configuration files (data sources, models)
-├── <a href="data/">data/</a>                     # Data lifecycle (raw → interim → processed)
+├── <a href="data/">data/</a>                     # Data lifecycle (raw, interim, processed)
 ├── <a href="src/">src/</a>                      # Source code (data, models, evaluation, explainability)
 ├── <a href="tests/">tests/</a>                    # Pytest test suite
 ├── <a href="scripts/">scripts/</a>                  # Standalone scripts (master pipelines, utilities)
