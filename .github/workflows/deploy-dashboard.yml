@@ -1,0 +1,40 @@
+name: Deploy dashboard to Hugging Face Space
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "dashboard/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install huggingface_hub
+        run: pip install huggingface_hub
+
+      - name: Push dashboard to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python - <<'EOF'
+          import os
+          from huggingface_hub import HfApi
+
+          api = HfApi(token=os.environ["HF_TOKEN"])
+          sha = os.environ.get("GITHUB_SHA", "")[:7]
+          api.upload_folder(
+              folder_path="dashboard",
+              repo_id="FaithCodes/uk-gdp-results-dashboard",
+              repo_type="space",
+              commit_message=f"Auto-deploy from GitHub {sha}",
+              ignore_patterns=["__pycache__/*", "*.pyc"],
+          )
+          EOF
