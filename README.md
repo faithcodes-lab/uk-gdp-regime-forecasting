@@ -3,6 +3,7 @@
 > **MSc dissertation research repository.** Forecasting UK GDP Growth Using Interpretable Gradient Boosting: Regime-Aware SHAP Analysis Across the Global Financial Crisis (GFC), Brexit and COVID-19 Structural Breaks (2000–2025).
 
 [![CI](https://github.com/faithcodes-lab/uk-gdp-regime-forecasting/actions/workflows/ci.yml/badge.svg)](https://github.com/faithcodes-lab/uk-gdp-regime-forecasting/actions/workflows/ci.yml)
+[![Coverage: 82%](https://img.shields.io/badge/coverage-82%25-brightgreen.svg)](https://github.com/faithcodes-lab/uk-gdp-regime-forecasting/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
